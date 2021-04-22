@@ -5,7 +5,7 @@ import trees.Terms._
 import trees.Commands._
 import trees.CommandsResponses._
 
-class CVC4Interpreter(executable: String, args: Array[String], tailPrinter: Boolean = false)
+class CVC5Interpreter(executable: String, args: Array[String], tailPrinter: Boolean = false)
   extends ProcessInterpreter(executable, args, tailPrinter) {
 
   printer.printCommand(SetOption(PrintSuccess(true)), in)
@@ -15,7 +15,7 @@ class CVC4Interpreter(executable: String, args: Array[String], tailPrinter: Bool
 
 }
 
-object CVC4Interpreter {
+object CVC5Interpreter {
 
   def buildDefault: CVC4Interpreter = {
     val executable = "cvc5"
@@ -24,7 +24,7 @@ object CVC4Interpreter {
                      "--produce-models",
                      "--dt-rewrite-error-sel",
                      "--print-success",
-                     "--lang", "smt2.5")
+                     "--lang", "smt2.6")
     new CVC4Interpreter(executable, args)
   }
 

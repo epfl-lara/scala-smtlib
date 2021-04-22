@@ -205,11 +205,15 @@ object Commands {
   //non standard declare-datatypes (no support for parametric types)
   case class DeclareDatatypes(datatypes: Seq[(SSymbol, Seq[Constructor])]) extends CommandExtension {
     override def print(ctx: PrintingContext): Unit = {
-      ctx.print("(declare-datatypes () ")
-      ctx.printNary(datatypes, (datatype: (SSymbol, Seq[Constructor])) => {
+      val (symbols, allConstructors) = datatypes.unzip
+      ctx.print("(declare-datatypes ")
+      ctx.printNary(symbols, (symbol: SSymbol) => {
         ctx.print("(")
-        ctx.print(datatype._1.name)
-        if (datatype._2.nonEmpty) ctx.printNary(datatype._2, (constructor: Constructor) => {
+        ctx.print(symbol.name)
+        ctx.print(" 0)")
+      }, "(", " ", ") (\n")
+      ctx.printNary(allConstructors, (constructors: Seq[Constructor]) => {
+        ctx.printNary(constructors, (constructor: Constructor) => {
           ctx.print("(")
           ctx.print(constructor.sym.name)
           if (constructor.fields.nonEmpty) ctx.printNary(constructor.fields, (field: (SSymbol, Sort)) => {
