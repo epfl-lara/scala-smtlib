@@ -123,9 +123,13 @@ class Lexer(reader: java.io.Reader) {
           case 'b' => BinaryLit(readBinary())
           case 'x' => HexadecimalLit(readHexadecimal())
           case c => {
-            throw new UnexpectedCharException(c,
-              Position(_currentLine, _currentCol), 
-              "'#' should be followed by a radix 'b' or 'x'")
+            val s = readSymbol(c)
+            if (s == "unspecified")
+              SymbolLit("#unspecified")
+            else
+              throw new UnexpectedCharException(c,
+                Position(_currentLine, _currentCol),
+                "'#' should be followed by a radix 'b' or 'x', or by 'unspecified'")
           }
         }
       }

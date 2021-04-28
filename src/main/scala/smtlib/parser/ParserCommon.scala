@@ -74,6 +74,7 @@ trait ParserCommon {
     check(token, expected)
     token
   }
+
   /*
    * Make sure the next token is exactly ``expected`` (usually a symbol lit)
    */
@@ -342,8 +343,8 @@ trait ParserCommon {
       case Tokens.StringLitKind => parseString
       case Tokens.KeywordKind => parseKeyword
       case Tokens.OParen => parseSList
-      case kind => 
-        expected(peekToken, 
+      case kind =>
+        expected(peekToken,
                  Tokens.SymbolLitKind, Tokens.NumeralLitKind, Tokens.BinaryLitKind,
                  Tokens.HexadecimalLitKind, Tokens.DecimalLitKind, Tokens.StringLitKind,
                  Tokens.KeywordKind, Tokens.OParen)

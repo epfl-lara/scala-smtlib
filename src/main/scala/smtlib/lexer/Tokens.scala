@@ -36,7 +36,6 @@ object Tokens {
   case class HexadecimalLit(content: Hexadecimal) extends Token(HexadecimalLitKind) {
     override def toString = content.toString
   }
-
   sealed trait TokenKind
 
   case object OParen extends TokenKind /* ( */
