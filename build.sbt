@@ -4,22 +4,21 @@ git.useGitDescribe := true
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
-javaOptions in IntegrationTest ++= Seq("-Xss128M")
+IntegrationTest / javaOptions ++= Seq("-Xss128M")
 
-fork in IntegrationTest := true
+IntegrationTest / fork := true
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.7"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.7" % "test"
 
+IntegrationTest / logBuffered := false
 
-logBuffered in IntegrationTest := false
-
-parallelExecution in Test := true
+Test / parallelExecution := true
 
 lazy val commonSettings = Seq(
   organization := "com.regblanc",
   name := "scala-smtlib",
-  scalaVersion := "2.12.13",
+  scalaVersion := "2.13.6",
   crossScalaVersions := Seq("2.10.7", "2.11.12", "2.12.8", "2.12.13", "2.13.0", "2.13.5")
 )
 
@@ -30,7 +29,7 @@ lazy val root = (project in file(".")).
 
 publishMavenStyle := true
 
-publishArtifact in Test := false
+Test / publishArtifact := false
 
 pomIncludeRepository := { _ => false }
 
