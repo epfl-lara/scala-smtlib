@@ -59,7 +59,7 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
       "%d - %s".format(counter, theoryString)
     }
 
-    
+
     val f1 = GreaterEquals(NumeralLit(42), NumeralLit(12))
     mkTest(f1, SatStatus, uniqueName())
 
@@ -95,7 +95,7 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
       "%d - %s".format(counter, theoryString)
     }
 
-    
+
     val f1 = GreaterEquals(NumeralLit(42), NumeralLit(12))
     mkTest(f1, SatStatus, uniqueName())
 
@@ -119,6 +119,8 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
   }
 
   {
+    import theories.Core.Equals
+    import theories.Ints.NumeralLit
     import theories.FixedSizeBitVectors._
     val theoryString = "Theory of Bit Vectors"
     var counter = 0
@@ -127,7 +129,6 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
       "%d - %s".format(counter, theoryString)
     }
 
-    
     val f1 = SGreaterEquals(BitVectorConstant(42, 32), BitVectorConstant(12, 32))
     mkTest(f1, SatStatus, uniqueName())
 
@@ -160,5 +161,25 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
 
     val f11 = UGreaterEquals(BitVectorLit(List(true, false)), BitVectorLit(List(true, false)))
     mkTest(f11, SatStatus, uniqueName())
+
+    val f12 = Equals(Int2BV(8, NumeralLit(42)), BitVectorConstant(42, 8))
+    mkTest(f12, SatStatus, uniqueName())
+
+    val f13 = Equals(BV2Nat(BitVectorConstant(42, 8)), NumeralLit(42))
+    mkTest(f13, SatStatus, uniqueName())
+
+    val f14 = Equals(Int2BV(8, NumeralLit(24)), BitVectorConstant(123, 8))
+    mkTest(f14, UnsatStatus, uniqueName())
+
+    val f15 = Equals(BV2Nat(BitVectorConstant(42, 8)), NumeralLit(123))
+    mkTest(f15, UnsatStatus, uniqueName())
+
+    // Testing that Int2BV wraps around for integer exceeding the BV size
+    val f16 = Equals(Int2BV(8, NumeralLit(42 + 256*3)), BitVectorConstant(42, 8))
+    mkTest(f16, SatStatus, uniqueName())
+
+    // Int2BV does not care about the sign
+    val f17 = Equals(Int2BV(8, NumeralLit(-214)), BitVectorConstant(42, 8))
+    mkTest(f17, SatStatus, uniqueName())
   }
 }

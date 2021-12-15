@@ -90,13 +90,17 @@ object FixedSizeBitVectors {
   object LShiftRight extends Operation2 { override val name = "bvlshr" }
   object AShiftRight extends Operation2 { override val name = "bvashr" }
 
+  object BV2Nat extends Operation1 { override val name = "bv2nat" }
 
   object Extract {
-    def apply(i: BigInt, j: BigInt, t: Term): Term =
+    def apply(i: BigInt, j: BigInt, t: Term): Term = {
+      require(i >= j)
       FunctionApplication(
         QualifiedIdentifier(Identifier(SSymbol("extract"), Seq(SNumeral(i), SNumeral(j)))),
         Seq(t)
       )
+    }
+
     def unapply(term: Term): Option[(BigInt, BigInt, Term)] = term match {
       case FunctionApplication(
         QualifiedIdentifier(
@@ -193,6 +197,22 @@ object FixedSizeBitVectors {
           Identifier(SSymbol("rotate_right"), Seq(SNumeral(i))),
           None
         ), Seq(t)) => Some((i, t))
+      case _ => None
+    }
+  }
+
+  object Int2BV {
+    def apply(m: BigInt, t: Term): Term =
+      FunctionApplication(
+        QualifiedIdentifier(Identifier(SSymbol("int2bv"), Seq(SNumeral(m)))),
+        Seq(t)
+      )
+    def unapply(term: Term): Option[(BigInt, Term)] = term match {
+      case FunctionApplication(
+        QualifiedIdentifier(
+          Identifier(SSymbol("int2bv"), Seq(SNumeral(m))),
+          None
+        ), Seq(t)) => Some((m, t))
       case _ => None
     }
   }

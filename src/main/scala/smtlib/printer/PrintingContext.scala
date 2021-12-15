@@ -170,7 +170,9 @@ class PrintingContext(writer: Writer) {
         print(id)
     }
 
-    case SNumeral(value) => print(value.toString)
+    case SNumeral(value) =>
+      if (value >= 0) print(value.toString)
+      else print(s"(- ${-value})")
     case SHexadecimal(value) => print(value.toString)
     case SBinary(value) => print("#b" + value.map(if(_) "1" else "0").mkString)
     case SDecimal(value) => print(value.toString)
@@ -341,7 +343,7 @@ class PrintingContext(writer: Writer) {
   }
 
   protected def printCommandResponse(response: CommandResponse): Unit = response match {
-    case Success => 
+    case Success =>
       print("success\n")
 
     case Unsupported =>
