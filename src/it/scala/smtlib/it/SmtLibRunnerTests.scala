@@ -42,13 +42,6 @@ class SmtLibRunnerTests extends AnyFunSuite with TestHelpers {
         compareWithInterpreter(executeZ3)(getZ3Interpreter, file)
       }
     })
-
-    filesInResourceDir("regression/smtlib/solving/z3-tactic", _.endsWith(".smt2")).foreach(file => {
-      test("With Z3 tactic.default_tactic=smt sat.euf=true: SMTLIB benchmark: " + file.getPath) {
-        val interpreter = new Z3Interpreter("z3 tactic.default_tactic=smt sat.euf=true", Array("-in", "-smt2"))
-        compareWithWant(interpreter, file, new File(file.getPath + ".want"))
-      }
-    })
   }
 
   if(isCVC4Available) {

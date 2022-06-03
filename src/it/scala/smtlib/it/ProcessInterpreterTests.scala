@@ -2,16 +2,15 @@ package smtlib
 package it
 
 import scala.sys.process._
-
 import org.scalatest.funsuite.AnyFunSuite
 
-import java.io.File
-import java.io.FileReader
-
+import java.io.{BufferedReader, BufferedWriter, StringReader, StringWriter}
 import parser.Parser
 import lexer.Lexer
 import printer.RecursivePrinter
 import interpreters._
+import smtlib.trees.Commands._
+import smtlib.trees.CommandsResponses.{Error => Err}
 
 
 class ProcessInterpreterTests extends AnyFunSuite with TestHelpers {
@@ -42,6 +41,18 @@ class ProcessInterpreterTests extends AnyFunSuite with TestHelpers {
     z3Interpreter.interrupt()
   }
 
+  test("ProcessInterpreter reads stderr") {
+    val outContent = "success"
+    val out = new BufferedReader(new StringReader(outContent))
+    val errContent = "Oh no, I stumbled upon a pebble :("
+    val err = new BufferedReader(new StringReader(errContent))
+    val in = new BufferedWriter(new StringWriter)
+    class DummyInterpreter extends ProcessInterpreter(RecursivePrinter, new Parser(new Lexer(out)), null, in, out, err)
+
+    val dummyInterpreter = new DummyInterpreter
+    val got = dummyInterpreter.eval(SetOption(PrintSuccess(true)))
+    assert(got === Err(s"Solver encountered some error: $errContent"))
+  }
 
   //TODO: test interrupt on a long running check-sat command with big benchmarks
 

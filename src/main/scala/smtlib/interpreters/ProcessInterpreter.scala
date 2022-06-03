@@ -10,12 +10,12 @@ import printer._
 
 import java.io._
 
-abstract class ProcessInterpreter private(override val printer: Printer,
-                                          override val parser: Parser,
-                                          protected val process: Process,
-                                          protected val in: BufferedWriter,
-                                          protected val out: BufferedReader,
-                                          protected val err: BufferedReader) extends Interpreter {
+abstract class ProcessInterpreter private[smtlib](override val printer: Printer,
+                                                  override val parser: Parser,
+                                                  protected val process: Process,
+                                                  protected val in: BufferedWriter,
+                                                  protected val out: BufferedReader,
+                                                  protected val err: BufferedReader) extends Interpreter {
 
   private def this(printer: Printer, otherArgs: (Parser, Process, BufferedWriter, BufferedReader, BufferedReader)) =
     this(printer, otherArgs._1, otherArgs._2, otherArgs._3, otherArgs._4, otherArgs._5)
@@ -54,9 +54,18 @@ abstract class ProcessInterpreter private(override val printer: Printer,
   override def eval(cmd: SExpr): SExpr = {
     def flushErr: String = {
       val sb = new StringBuilder
-      while (err.ready()) {
-        sb ++= err.readLine()
-        if (err.ready()) sb += '\n'
+      var ok = err.ready()
+      while (ok) {
+        val line = err.readLine()
+        if (line != null) {
+          if (sb.nonEmpty) {
+            sb += '\n'
+          }
+          sb ++= line
+          ok = err.ready()
+        } else {
+          ok = false
+        }
       }
       sb.toString()
     }
