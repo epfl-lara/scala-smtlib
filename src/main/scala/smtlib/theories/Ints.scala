@@ -42,10 +42,10 @@ object Ints {
   }
 
   object Neg extends Operation1 { override val name = "-" }
-  object Add extends Operation2 { override val name = "+" }
-  object Sub extends Operation2 { override val name = "-" }
-  object Mul extends Operation2 { override val name = "*" }
-  object Div extends Operation2 { override val name = "div" }
+  object Add extends OperationN1 { override val name = "+" }
+  object Sub extends OperationN1 { override val name = "-" }
+  object Mul extends OperationN1 { override val name = "*" }
+  object Div extends OperationN1 { override val name = "div" }
   object Mod extends Operation2 { override val name = "mod" }
   object Abs extends Operation1 { override val name = "abs" }
 

@@ -56,7 +56,7 @@ object FixedSizeBitVectors {
   }
 
 
-  object Concat extends Operation2 { override val name = "concat" }
+  object Concat extends OperationN1 { override val name = "concat" }
 
   object Not extends Operation1 { override val name = "bvnot" }
   object Neg extends Operation1 { override val name = "bvneg" }
@@ -68,9 +68,9 @@ object FixedSizeBitVectors {
   object XNOr extends Operation2 { override val name = "bvxnor" }
 
   object Comp extends Operation2 { override val name = "bvcomp" }
-  object Add extends Operation2 { override val name = "bvadd" }
+  object Add extends OperationN1 { override val name = "bvadd" }
   object Sub extends Operation2 { override val name = "bvsub" }
-  object Mul extends Operation2 { override val name = "bvmul" }
+  object Mul extends OperationN1 { override val name = "bvmul" }
   object UDiv extends Operation2 { override val name = "bvudiv" }
   object SDiv extends Operation2 { override val name = "bvsdiv" }
   object URem extends Operation2 { override val name = "bvurem" }

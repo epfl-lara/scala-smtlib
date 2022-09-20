@@ -51,6 +51,7 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
 
 
   {
+    import theories.Core.Equals
     import theories.Ints._
     val theoryString = "Theory of Ints"
     var counter = 0
@@ -84,9 +85,22 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
 
     val f8 = LessEquals(Sub(NumeralLit(5), NumeralLit(3)), NumeralLit(1))
     mkTest(f8, UnsatStatus, uniqueName())
+
+    val f9 = Equals(Add(NumeralLit(1), NumeralLit(2), NumeralLit(3), NumeralLit(4)), NumeralLit(10))
+    mkTest(f9, SatStatus, uniqueName())
+
+    val f10 = Equals(Sub(NumeralLit(1), NumeralLit(2), NumeralLit(3), NumeralLit(4)), NumeralLit(-8))
+    mkTest(f10, SatStatus, uniqueName())
+
+    val f11 = Equals(Mul(NumeralLit(1), NumeralLit(2), NumeralLit(3), NumeralLit(4)), NumeralLit(24))
+    mkTest(f11, SatStatus, uniqueName())
+
+    val f12 = Equals(Div(NumeralLit(80), NumeralLit(4), NumeralLit(2)), NumeralLit(10))
+    mkTest(f12, SatStatus, uniqueName())
   }
 
   {
+    import theories.Core.Equals
     import theories.Reals._
     val theoryString = "Theory of Reals"
     var counter = 0
@@ -116,6 +130,18 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
 
     val f8 = LessEquals(Sub(NumeralLit(5), NumeralLit(3)), NumeralLit(1))
     mkTest(f8, UnsatStatus, uniqueName())
+
+    val f9 = Equals(Add(NumeralLit(1), NumeralLit(2), NumeralLit(3), NumeralLit(4)), NumeralLit(10))
+    mkTest(f9, SatStatus, uniqueName())
+
+    val f10 = Equals(Sub(NumeralLit(1), NumeralLit(2), NumeralLit(3), NumeralLit(4)), NumeralLit(-8))
+    mkTest(f10, SatStatus, uniqueName())
+
+    val f11 = Equals(Mul(NumeralLit(1), NumeralLit(2), NumeralLit(3), NumeralLit(4)), NumeralLit(24))
+    mkTest(f11, SatStatus, uniqueName())
+
+    val f12 = Equals(Div(NumeralLit(80), NumeralLit(4), NumeralLit(2)), NumeralLit(10))
+    mkTest(f12, SatStatus, uniqueName())
   }
 
   {
@@ -181,5 +207,11 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
     // Int2BV does not care about the sign
     val f17 = Equals(Int2BV(8, NumeralLit(-214)), BitVectorConstant(42, 8))
     mkTest(f17, SatStatus, uniqueName())
+
+    val f18 = Equals(Add(BitVectorConstant(1, 32), BitVectorConstant(2, 32), BitVectorConstant(3, 32), BitVectorConstant(4, 32)), BitVectorConstant(10, 32))
+    mkTest(f18, SatStatus, uniqueName())
+
+    val f20 = Equals(Mul(BitVectorConstant(1, 32), BitVectorConstant(2, 32), BitVectorConstant(3, 32), BitVectorConstant(4, 32)), BitVectorConstant(24, 32))
+    mkTest(f20, SatStatus, uniqueName())
   }
 }

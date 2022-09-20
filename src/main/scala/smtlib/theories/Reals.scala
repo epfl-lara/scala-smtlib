@@ -28,7 +28,7 @@ object Reals {
       case _ => None
     }
   }
-  
+
   object DecimalLit {
     def apply(value: BigDecimal): Term = SDecimal(value)
     def unapply(term: Term): Option[BigDecimal] = term match {
@@ -38,10 +38,10 @@ object Reals {
   }
 
   object Neg extends Operation1 { override val name = "-" }
-  object Add extends Operation2 { override val name = "+" }
-  object Sub extends Operation2 { override val name = "-" }
-  object Mul extends Operation2 { override val name = "*" }
-  object Div extends Operation2 { override val name = "/" }
+  object Add extends OperationN1 { override val name = "+" }
+  object Sub extends OperationN1 { override val name = "-" }
+  object Mul extends OperationN1 { override val name = "*" }
+  object Div extends OperationN1 { override val name = "/" }
 
   object LessThan extends Operation2 { override val name = "<" }
   object LessEquals extends Operation2 { override val name = "<=" }
