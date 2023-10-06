@@ -40,29 +40,25 @@ object Interpreter {
   import java.io.BufferedReader
   import java.io.File
 
-  def execute(script: Script)(implicit interpreter: Interpreter): Unit = {
+  def execute(script: Script)(using interpreter: Interpreter): Unit = {
     for(cmd <- script.commands)
       interpreter.eval(cmd)
   }
 
-  def execute(scriptReader: Reader)(implicit interpreter: Interpreter): Unit = {
-    val parser = new Parser(new lexer.Lexer(scriptReader))
-    val cmd: Command = null
-    do {
+  def execute(scriptReader: Reader)(using Interpreter): Unit =
+    execute(new Parser(new lexer.Lexer(scriptReader)))
+
+  def execute(file: File)(using Interpreter): Unit =
+    execute(new Parser(new lexer.Lexer(new BufferedReader(new FileReader(file)))))
+
+  private def execute(parser: Parser)(using interpreter: Interpreter): Unit = {
+    // do-while, Scala 3 style
+    // See https://docs.scala-lang.org/scala3/reference/dropped-features/do-while.html
+    while ({
       val cmd = parser.parseCommand
       if(cmd != null)
         interpreter.eval(cmd)
-    } while(cmd != null)
+      cmd != null
+    }) () // This trailing () is important! If we remove it, it messes with the next statement
   }
-
-  def execute(file: File)(implicit interpreter: Interpreter): Unit = {
-    val parser = new Parser(new lexer.Lexer(new BufferedReader(new FileReader(file))))
-    var cmd: Command = null
-    do {
-      cmd = parser.parseCommand
-      if(cmd != null)
-        interpreter.eval(cmd)
-    } while(cmd != null)
-  }
-
 }

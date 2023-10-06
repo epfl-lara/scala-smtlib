@@ -216,7 +216,7 @@ class LexerTests extends AnyFunSuite with TimeLimits {
 
   test("quoted symbols can have new lines") {
     assert(lexUniqueToken("""|abc
-deF| 
+deF|
 """) === SymbolLit("""abc
 deF"""))
     assert(lexUniqueToken(
@@ -323,9 +323,9 @@ See you!"""))
      * Since the pipe is empty, the lexer should not even start to read
      * in the reader. It should only start reading when asked for the nextToken token.
      */
-    val lexer = failAfter(3 seconds) { new Lexer(pis) }
-    /* 
-     * this is impossible for the lexer to determine whether the token is terminated 
+    val lexer = failAfter(3.seconds) { new Lexer(pis) }
+    /*
+     * this is impossible for the lexer to determine whether the token is terminated
      * or if the nextToken char takes time to arrive, so we need some syntactic separation
      * hence the space after 12
      */

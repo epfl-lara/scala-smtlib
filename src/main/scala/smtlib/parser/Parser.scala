@@ -17,6 +17,12 @@ object Parser {
   class UnexpectedEOFException(expected: Seq[TokenKind])
     extends Exception("Unexpected end of file. Expected: " + expected.mkString("[",",","]"))
 
+  class UnsupportedException(msg: String)
+    extends Exception(msg)
+
+  class IllformedCommandException(val command: Token, extra: String)
+    extends Exception(s"Ill-formed command ${command.toString} @ ${command.getPos}: $extra")
+
   def fromString(str: String): Parser = {
     val lexer = new Lexer(new java.io.StringReader(str))
     new Parser(lexer)

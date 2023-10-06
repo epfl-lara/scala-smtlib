@@ -8,7 +8,7 @@ import trees.Commands._
 
 import java.io.BufferedReader
 
-class CVC4Interpreter(executable: String,
+class CVC5Interpreter(executable: String,
                       args: Array[String],
                       printer: Printer = RecursivePrinter,
                       parserCtor: BufferedReader => Parser = out => new Parser(new Lexer(out)))
@@ -21,17 +21,16 @@ class CVC4Interpreter(executable: String,
 
 }
 
-object CVC4Interpreter {
+object CVC5Interpreter {
 
-  def buildDefault: CVC4Interpreter = {
-    val executable = "cvc4"
+  def buildDefault: CVC5Interpreter = {
+    val executable = "cvc5"
     val args = Array("-q",
                      "-i",
                      "--produce-models",
-                     "--dt-rewrite-error-sel",
                      "--print-success",
                      "--lang", "smt2.6")
-    new CVC4Interpreter(executable, args)
+    new CVC5Interpreter(executable, args)
   }
 
 }

@@ -44,7 +44,7 @@ class Parser(lexer: Lexer) extends parser.Parser(lexer) {
 
     case Tokens.At =>
       eat(Tokens.At)
-      val (caller +: args) = parseUntil(LT.CParen, eatEnd = false)(() => parseTerm)
+      val (caller +: args) = parseUntil(LT.CParen, eatEnd = false)(() => parseTerm): @unchecked
       Application(caller, args)
 
     case Tokens.Match =>

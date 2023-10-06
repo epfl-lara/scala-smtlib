@@ -18,40 +18,70 @@ import interpreters._
   *
   * Compare the result of running command by command with an interpreter against
   * running the corresponding executable directly on the .smt2 files.
-  *
-  * TODO: proper way to display warning when not all tests are run because of not found executables.
   */
 class SmtLibRunnerTests extends AnyFunSuite with TestHelpers {
 
   filesInResourceDir("regression/smtlib/solving/all", _.endsWith(".smt2")).foreach(file => {
+    val z3Test = s"With Z3: SMTLIB benchmark ${file.getPath}"
     if(isZ3Available) {
-      test("With Z3: SMTLIB benchmark: " + file.getPath) {
+      test(z3Test) {
         compareWithInterpreter(executeZ3)(getZ3Interpreter, file)
       }
+    } else {
+      ignore(z3Test) {}
     }
+
+    val cvc4Test = s"With CVC4: SMTLIB benchmark ${file.getPath}"
     if(isCVC4Available) {
-      test("With CVC4: SMTLIB benchmark: " + file.getPath) {
+      test(cvc4Test) {
         compareWithInterpreter(executeCVC4)(getCVC4Interpreter, file)
       }
+    } else {
+      ignore(cvc4Test) {}
+    }
+
+    val cvc5Test = s"With cvc5: SMTLIB benchmark ${file.getPath}"
+    if (isCVC5Available) {
+      test(cvc5Test) {
+        compareWithInterpreter(executeCVC5)(getCVC5Interpreter, file)
+      }
+    } else {
+      ignore(cvc5Test) {}
     }
   })
 
-  if(isZ3Available) {
-    filesInResourceDir("regression/smtlib/solving/z3", _.endsWith(".smt2")).foreach(file => {
-      test("With Z3: SMTLIB benchmark: " + file.getPath) {
+  // Z3-specific
+  filesInResourceDir("regression/smtlib/solving/z3", _.endsWith(".smt2")).foreach(file => {
+    val z3Test = "With Z3: SMTLIB benchmark: " + file.getPath
+    if (isZ3Available) {
+      test(z3Test) {
         compareWithInterpreter(executeZ3)(getZ3Interpreter, file)
       }
-    })
-  }
+    } else {
+      ignore(z3Test) {}
+    }
+  })
 
-  if(isCVC4Available) {
-    filesInResourceDir("regression/smtlib/solving/cvc4", _.endsWith(".smt2")).foreach(file => {
-      test("With CVC4: SMTLIB benchmark: " + file.getPath) {
+  // CVC-specifc
+  filesInResourceDir("regression/smtlib/solving/cvc4", _.endsWith(".smt2")).foreach(file => {
+    val cvc4Test = "With CVC4: SMTLIB benchmark: " + file.getPath
+    if (isCVC4Available) {
+      test(cvc4Test) {
         compareWithWant(getCVC4Interpreter, file, new File(file.getPath + ".want"))
       }
-    })
-  }
+    } else {
+      ignore(cvc4Test) {}
+    }
 
+    val cvc5Test = "With cvc5: SMTLIB benchmark: " + file.getPath
+    if (isCVC5Available) {
+      test(cvc5Test) {
+        compareWithWant(getCVC5Interpreter, file, new File(file.getPath + ".want"))
+      }
+    } else {
+      ignore(cvc5Test) {}
+    }
+  })
 
   def compareWithInterpreter(executable: (File) => (String => Unit) => Unit)
                             (interpreter: Interpreter, file: File) = {
@@ -79,9 +109,5 @@ class SmtLibRunnerTests extends AnyFunSuite with TestHelpers {
       assert(expected.trim === res.replace('\n', ' ').trim)
     }
     assert(parser.parseCommand === null)
-    intercept[smtlib.parser.Parser.UnexpectedEOFException] {
-      // There shouldn't be anything left on the interpreter parser (the solver process).
-      interpreter.parser.parseSExpr
-    }
   }
 }

@@ -1,6 +1,5 @@
 package smtlib
 package theories
-package experimental
 
 import trees.Terms._
 
@@ -37,14 +36,14 @@ class StringsTests extends AnyFunSuite with Matchers {
       case StringLit(n) => assert(n === "abc")
       case _ => assert(false)
     }
-    
+
     val l2 = StringLit("")
 
     l2 match {
       case StringLit(n) => assert(n === "")
       case _ => assert(false)
     }
-    
+
     val l3 = StringLit("with space")
 
     l3 match {
@@ -98,7 +97,7 @@ class StringsTests extends AnyFunSuite with Matchers {
       }
       case _ => assert(false)
     }
-   
+
   }
 
   test("At is correctly constructed and extracted") {
@@ -123,8 +122,8 @@ class StringsTests extends AnyFunSuite with Matchers {
 
   test("smtlib string format") {
     import parser.Parser
-    
-    implicit class TestParse(s: String) {
+
+    extension (s: String) {
       def shouldParse(f: PartialFunction[Term, Any]) = {
         val term = Parser.fromString(s).parseTerm
         if(f.isDefinedAt(term)) f(term) else {
@@ -135,8 +134,8 @@ class StringsTests extends AnyFunSuite with Matchers {
         Parser.fromString(s).parseTerm should equal(p)
       }
     }
-    
-    
+
+
     "\"abc\"" shouldParseTo
     StringLit("abc")
 
@@ -145,13 +144,13 @@ class StringsTests extends AnyFunSuite with Matchers {
 
     "(str.++ \"a\" \"bc\" \"def\" )" shouldParseTo
     Concat(StringLit("a"), StringLit("bc"), StringLit("def"))
-    
+
     "(str.len \"abcd\")" shouldParseTo
     Length(StringLit("abcd"))
-    
+
     "(str.at \"abcd\" 1)" shouldParseTo
     At(StringLit("abcd"), NumeralLit(1))
-    
+
     "(str.substr \"abcdef\" 2 5)" shouldParseTo
     Substring(StringLit("abcdef"), NumeralLit(2), NumeralLit(5))
   }

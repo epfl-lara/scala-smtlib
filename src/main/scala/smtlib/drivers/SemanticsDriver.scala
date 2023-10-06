@@ -52,7 +52,7 @@ class SemanticsDriver(
   }
 
   private var executionMode: ExecutionMode = StartMode
-  
+
   private var logic: Option[Logic] = None
   private var printSuccess = true
   private var globalDeclarations = false
@@ -82,9 +82,6 @@ class SemanticsDriver(
         rawSolver.eval(SetOption(option))
         doPrintSuccess()
       }
-
-    case InteractiveMode(value) => 
-      regularOutputChannel(Unsupported)
 
     case PrintSuccess(value) =>
       printSuccess = value
@@ -153,7 +150,7 @@ class SemanticsDriver(
       regularOutputChannel(Unsupported)
   }
 
-  
+
   private class AssertionLevel {
 
     var assertions: Set[Term] = Set()
@@ -161,7 +158,7 @@ class SemanticsDriver(
     private var sortSymbols: Map[SSymbol, Int] = Map()
     private var sortAliases: Map[SSymbol, (Seq[SSymbol], Sort)] = Map()
 
-    def isSortDefined(name: SSymbol): Boolean = 
+    def isSortDefined(name: SSymbol): Boolean =
       sortSymbols.contains(name) || sortAliases.contains(name)
 
     def newSortSymbol(name: SSymbol, arity: Int): Unit = {

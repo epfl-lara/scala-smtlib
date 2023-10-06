@@ -8,7 +8,7 @@ IntegrationTest / javaOptions ++= Seq("-Xss128M")
 
 IntegrationTest / fork := true
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.7" % "test;it"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test;it"
 
 
 IntegrationTest / logBuffered := false
@@ -18,8 +18,7 @@ Test / parallelExecution := true
 lazy val commonSettings = Seq(
   organization := "com.regblanc",
   name := "scala-smtlib",
-  scalaVersion := "2.13.6",
-  crossScalaVersions := Seq("3.0.2")
+  scalaVersion := "3.3.0",
 )
 
 lazy val root = (project in file(".")).

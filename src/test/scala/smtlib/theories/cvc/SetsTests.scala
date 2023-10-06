@@ -1,17 +1,17 @@
 package smtlib
 package theories
-package experimental
+package cvc
 
-import trees.Terms._
-
-import Sets._
 import Ints.{IntSort, NumeralLit}
-
 import org.scalatest.funsuite.AnyFunSuite
 
-class SetsTests extends AnyFunSuite {
+trait SetsTests extends AnyFunSuite {
 
   override def suiteName = "Set theory test suite"
+
+  val cvcSets: Sets
+
+  import cvcSets._
 
   test("String sort correctly constructed and extracted") {
     SetSort(IntSort()) match {
@@ -39,6 +39,7 @@ class SetsTests extends AnyFunSuite {
       case EmptySet(Reals.RealSort()) => assert(false)
       case NumeralLit(_) => assert(false)
       case EmptySet(IntSort()) => assert(true)
+      case _ => assert(false)
     }
   }
 
@@ -62,5 +63,10 @@ class SetsTests extends AnyFunSuite {
       case _ => assert(false)
     }
   }
-
+}
+class CVC4SetsTests extends SetsTests {
+  override val cvcSets: Sets = CVC4Sets
+}
+class CVC5SetsTests extends SetsTests {
+  override val cvcSets: Sets = CVC5Sets
 }

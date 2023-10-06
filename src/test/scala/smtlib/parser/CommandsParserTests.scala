@@ -42,10 +42,10 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
 
   test("Parsing assert commands") {
-    assert(parseUniqueCmd("(assert true)") === 
+    assert(parseUniqueCmd("(assert true)") ===
            Assert(QualifiedIdentifier("true")))
-    assert(parseUniqueCmd("(assert (p 42))") === 
-           Assert(FunctionApplication(QualifiedIdentifier("p"), 
+    assert(parseUniqueCmd("(assert (p 42))") ===
+           Assert(FunctionApplication(QualifiedIdentifier("p"),
                   Seq(SNumeral(42)))))
   }
 
@@ -60,12 +60,12 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
   }
 
   test("Parsing check-sat-assuming commands") {
-    assert(parseUniqueCmd("(check-sat-assuming (a b c))") === 
+    assert(parseUniqueCmd("(check-sat-assuming (a b c))") ===
            CheckSatAssuming(Seq(
              PropLiteral("a", true),
              PropLiteral("b", true),
              PropLiteral("c", true))))
-    assert(parseUniqueCmd("(check-sat-assuming ((not a) b (not c)))") === 
+    assert(parseUniqueCmd("(check-sat-assuming ((not a) b (not c)))") ===
            CheckSatAssuming(Seq(
              PropLiteral("a", false),
              PropLiteral("b", true),
@@ -112,7 +112,7 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
            DefineFunRec(FunDef("f", Seq(SortedVar("a", Sort("A"))), Sort("B"),
                         FunctionApplication(QualifiedIdentifier("f"), Seq(QualifiedIdentifier("a"))))))
     assert(parseUniqueCmd("(define-fun-rec f ((a A)) A (f a))") ===
-           DefineFunRec(FunDef("f", Seq(SortedVar("a", Sort("A"))), Sort("A"), 
+           DefineFunRec(FunDef("f", Seq(SortedVar("a", Sort("A"))), Sort("A"),
                         FunctionApplication(QualifiedIdentifier("f"), Seq(QualifiedIdentifier("a"))))))
 
   }
@@ -136,8 +136,8 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
     assert(parseUniqueCmd("(define-sort A () B)") ===
            DefineSort("A", Seq(), Sort("B")))
     assert(parseUniqueCmd("(define-sort A (B C) (Array B C))") ===
-           DefineSort("A", Seq("B", "C"), 
-                      Sort(Identifier("Array"), 
+           DefineSort("A", Seq("B", "C"),
+                      Sort(Identifier("Array"),
                            Seq(Sort("B"), Sort("C")))))
   }
 
@@ -252,21 +252,18 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
   }
 
   test("Parsing non standard set-logic commands") {
-    assert(parseUniqueCmd("(set-logic UNIQUE_LOGIC)") === 
+    assert(parseUniqueCmd("(set-logic UNIQUE_LOGIC)") ===
       SetLogic(NonStandardLogic(SSymbol("UNIQUE_LOGIC"))))
-    assert(parseUniqueCmd("(set-logic MY_COOL_LOGIC)") === 
+    assert(parseUniqueCmd("(set-logic MY_COOL_LOGIC)") ===
       SetLogic(NonStandardLogic(SSymbol("MY_COOL_LOGIC"))))
   }
 
   test("Parsing set-option command") {
-    assert(parseUniqueCmd("""(set-option :diagnostic-output-channel "toto")""") === 
+    assert(parseUniqueCmd("""(set-option :diagnostic-output-channel "toto")""") ===
 
                           SetOption(DiagnosticOutputChannel("toto")))
     assert(parseUniqueCmd("(set-option :global-declarations true)") === SetOption(GlobalDeclarations(true)))
     assert(parseUniqueCmd("(set-option :global-declarations false)") === SetOption(GlobalDeclarations(false)))
-
-    assert(parseUniqueCmd("(set-option :interactive-mode true)") === SetOption(InteractiveMode(true)))
-    assert(parseUniqueCmd("(set-option :interactive-mode false)") === SetOption(InteractiveMode(false)))
 
     assert(parseUniqueCmd("(set-option :print-success true)") === SetOption(PrintSuccess(true)))
     assert(parseUniqueCmd("(set-option :print-success false)") === SetOption(PrintSuccess(false)))
@@ -287,7 +284,7 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
     assert(parseUniqueCmd("(set-option :random-seed 42)") === SetOption(RandomSeed(42)))
     assert(parseUniqueCmd("(set-option :random-seed 12)") === SetOption(RandomSeed(12)))
 
-    assert(parseUniqueCmd("""(set-option :regular-output-channel "test")""") === 
+    assert(parseUniqueCmd("""(set-option :regular-output-channel "test")""") ===
                           SetOption(RegularOutputChannel("test")))
 
     assert(parseUniqueCmd("(set-option :reproducible-resource-limit 4)") === SetOption(ReproducibleResourceLimit(4)))
@@ -324,22 +321,45 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
 
   test("Parsing declare-datatypes commands") {
-    assert(parseUniqueCmd(
-      "(declare-datatypes () ( (A (A1 (a1 Int) (a2 A)) (A2)) ))") ===
-      DeclareDatatypes(Seq(
-        (SSymbol("A"), Seq(Constructor("A1", 
-                            Seq((SSymbol("a1"), Sort("Int")), (SSymbol("a2"), Sort("A")))),
-                           Constructor("A2", Seq())
-                          ))
-      ))
+    import theories.Ints._
+
+    val list = SSymbol("IntList")
+    val listSort = Sort(Identifier(list))
+    val nil = SSymbol("Nil")
+    val cons = SSymbol("Cons")
+    val head = SSymbol("head")
+    val tail = SSymbol("tail")
+    val listCtors = List(
+      Constructor(nil, Seq.empty),
+      Constructor(cons, Seq((head, IntSort()), (tail, listSort)))
     )
 
+    assert(parseUniqueCmd(
+      """(declare-datatypes ((IntList 0)) (
+        |    ( (Nil) (Cons (head Int) (tail IntList) ))
+        |))""".stripMargin) === DeclareDatatypes(List((list, listCtors))))
+
+    val a = SSymbol("A")
+    val aCtors = Seq(Constructor("A1",
+      Seq((SSymbol("a1"), Sort("Int")), (SSymbol("a2"), Sort("A")))),
+      Constructor("A2", Seq())
+    )
+    assert(parseUniqueCmd(
+      "(declare-datatypes ((A 0)) ( ((A1 (a1 Int) (a2 A)) (A2)) ))") ===
+      DeclareDatatypes(Seq((a, aCtors)))
+    )
+
+    assert(parseUniqueCmd(
+      """(declare-datatypes ((A 0) (IntList 0)) (
+        |    ( (A1 (a1 Int) (a2 A)) (A2) )
+        |    ( (Nil) (Cons (head Int) (tail IntList) ))
+        |))""".stripMargin) === DeclareDatatypes(List((a, aCtors), (list, listCtors))))
   }
 
   test("Commands with terms have correct positions") {
     val cmd3 = parseUniqueCmd("(assert (< x y))")
     assert(cmd3.getPos === Position(1, 1))
-    val Assert(fa@FunctionApplication(fun, Seq(x, y))) = cmd3
+    val Assert(fa@FunctionApplication(fun, Seq(x, y))) = cmd3: @unchecked
     assert(fa.getPos === Position(1, 9))
     assert(fun.getPos === Position(1, 10))
     assert(x.getPos === Position(1, 12))
@@ -347,7 +367,7 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
     {
       val cmd4 = parseUniqueCmd("(get-value (x y z))")
-      val GetValue(x, Seq(y, z)) = cmd4
+      val GetValue(x, Seq(y, z)) = cmd4: @unchecked
       assert(cmd4.getPos === Position(1,1))
       assert(x.getPos === Position(1,13))
       assert(y.getPos === Position(1,15))
@@ -369,12 +389,12 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
   test("Commands with simple flat structure have correct positions") {
     val cmd1 = parseUniqueCmd("""(echo "Hello World")""")
-    val Echo(hello) = cmd1
+    val Echo(hello) = cmd1: @unchecked
     assert(cmd1.getPos === Position(1,1))
     assert(hello.getPos === Position(1,7))
 
     val cmd2 = parseUniqueCmd("""(check-sat-assuming ((not a) b (not c)))""")
-    val CheckSatAssuming(Seq(l1, l2, l3)) = cmd2
+    val CheckSatAssuming(Seq(l1, l2, l3)) = cmd2: @unchecked
     assert(cmd2.getPos === Position(1,1))
     assert(l1.getPos === Position(1,22))
     assert(l2.getPos === Position(1,30))
@@ -384,7 +404,7 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
   test("Commands for declarations and definitions have correct positions") {
     {
       val declareConst = parseUniqueCmd("(declare-const a A)")
-      val DeclareConst(a, sa) = declareConst
+      val DeclareConst(a, sa) = declareConst: @unchecked
       assert(declareConst.getPos === Position(1,1))
       assert(a.getPos === Position(1,16))
       assert(sa.getPos === Position(1, 18))
@@ -392,7 +412,7 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
     {
       val declareFun = parseUniqueCmd("(declare-fun f (A B) C)")
-      val DeclareFun(f, Seq(a,b), c) = declareFun
+      val DeclareFun(f, Seq(a,b), c) = declareFun: @unchecked
       assert(declareFun.getPos === Position(1,1))
       assert(f.getPos === Position(1,14))
       assert(a.getPos === Position(1,17))
@@ -403,14 +423,14 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
     {
       val declareSort = parseUniqueCmd("(declare-sort A 3)")
       assert(parseUniqueCmd("(declare-sort A 3)") === DeclareSort("A", 3))
-      val DeclareSort(a, n) = declareSort
+      val DeclareSort(a, n) = declareSort: @unchecked
       assert(declareSort.getPos === Position(1,1))
       assert(a.getPos === Position(1,15))
     }
 
     {
       val defineFun = parseUniqueCmd("(define-fun f ((a A)) B a)")
-      val DefineFun(FunDef(f, Seq(a), b, ta)) = defineFun
+      val DefineFun(FunDef(f, Seq(a), b, ta)) = defineFun: @unchecked
       assert(defineFun.getPos === Position(1,1))
       assert(f.getPos === Position(1,13))
       assert(a.getPos === Position(1,16))
@@ -420,7 +440,7 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
     {
       val defineSort = parseUniqueCmd("(define-sort A () B)")
-      val DefineSort(a, Seq(), b) = defineSort
+      val DefineSort(a, Seq(), b) = defineSort: @unchecked
       assert(defineSort.getPos === Position(1,1))
       assert(a.getPos === Position(1,14))
       assert(b.getPos === Position(1,19))
@@ -429,7 +449,7 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
   test("Info have correct positions") {
     val setInfo1 = parseUniqueCmd("""(set-info :author "Reg")""")
-    val SetInfo(attr@Attribute(author, Some(reg))) = setInfo1
+    val SetInfo(attr@Attribute(author, Some(reg))) = setInfo1: @unchecked
     assert(setInfo1.getPos === Position(1, 1))
     assert(attr.getPos === Position(1, 11))
     assert(author.getPos === Position(1, 11))
@@ -437,46 +457,46 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
     assert(parseUniqueCmd("""(set-info :test)""") === SetInfo(Attribute(SKeyword("test"), None)))
     val setInfo2 = parseUniqueCmd("(set-info :test)")
-    val SetInfo(attr2@Attribute(test, None)) = setInfo2
+    val SetInfo(attr2@Attribute(test, None)) = setInfo2: @unchecked
     assert(setInfo2.getPos === Position(1, 1))
     assert(attr2.getPos === Position(1, 11))
     assert(test.getPos === Position(1, 11))
 
     val getInfo1 = parseUniqueCmd("(get-info :all-statistics)")
-    val GetInfo(flag1) = getInfo1
+    val GetInfo(flag1) = getInfo1: @unchecked
     assert(getInfo1.getPos === Position(1, 1))
     assert(flag1.getPos === Position(1, 11))
 
     val getInfo2 = parseUniqueCmd("(get-info :authors)")
-    val GetInfo(flag2) = getInfo2
+    val GetInfo(flag2) = getInfo2: @unchecked
     assert(getInfo2.getPos === Position(1, 1))
     assert(flag2.getPos === Position(1, 11))
 
     //that one is different as we are parsing a custom info flag, and not a built-in
     val getInfo3 = parseUniqueCmd("(get-info :custom)")
-    val GetInfo(flag3) = getInfo3
+    val GetInfo(flag3) = getInfo3: @unchecked
     assert(getInfo3.getPos === Position(1, 1))
     assert(flag3.getPos === Position(1, 11))
   }
 
   test("Logics have correct positions") {
     val setLogic1 = parseUniqueCmd("(set-logic AUFLIA)")
-    val SetLogic(logic1) = setLogic1
+    val SetLogic(logic1) = setLogic1: @unchecked
     assert(setLogic1.getPos === Position(1,1))
     assert(logic1.getPos === Position(1, 12))
 
     val setLogic2 = parseUniqueCmd("(set-logic LRA)")
-    val SetLogic(logic2) = setLogic2
+    val SetLogic(logic2) = setLogic2: @unchecked
     assert(setLogic2.getPos === Position(1,1))
     assert(logic2.getPos === Position(1, 12))
 
     val setLogic3 = parseUniqueCmd("(set-logic ALL)")
-    val SetLogic(logic3) = setLogic3
+    val SetLogic(logic3) = setLogic3: @unchecked
     assert(setLogic3.getPos === Position(1,1))
     assert(logic3.getPos === Position(1, 12))
 
     val setLogic4 = parseUniqueCmd("(set-logic UNIQUE_LOGIC)")
-    val SetLogic(logic4@NonStandardLogic(customLogicSym)) = setLogic4
+    val SetLogic(logic4@NonStandardLogic(customLogicSym)) = setLogic4: @unchecked
     assert(setLogic4.getPos === Position(1,1))
     assert(logic4.getPos === Position(1, 12))
     assert(customLogicSym.getPos === Position(1, 12))
@@ -484,13 +504,12 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
 
   test("Options have correct positions") {
     def assertOptionPosition(raw: String, pos: Position): Unit = {
-      val SetOption(option) = parseUniqueCmd(raw)
+      val SetOption(option) = parseUniqueCmd(raw): @unchecked
       assert(option.getPos === pos)
     }
 
     assertOptionPosition("""(set-option :diagnostic-output-channel "toto")""", Position(1, 13))
     assertOptionPosition("(set-option :global-declarations true)", Position(1, 13))
-    assertOptionPosition("(set-option :interactive-mode true)", Position(1, 13))
     assertOptionPosition("(set-option :print-success true)", Position(1, 13))
     assertOptionPosition(" (set-option  :print-success false)", Position(1, 15))
     assertOptionPosition("(set-option :produce-assertions true)", Position(1, 13))
@@ -499,22 +518,22 @@ class CommandsParserTests extends AnyFunSuite with TimeLimits {
     assertOptionPosition("""(set-option :regular-output-channel "test")""", Position(1, 13))
 
     val customOptionCmd = parseUniqueCmd("(set-option :custom 42)")
-    val SetOption(attr@AttributeOption(Attribute(keyword, Some(numeral)))) = customOptionCmd
+    val SetOption(attr@AttributeOption(Attribute(keyword, Some(numeral)))) = customOptionCmd: @unchecked
     assert(customOptionCmd.getPos === Position(1, 1))
     assert(attr.getPos === Position(1, 13))
     assert(keyword.getPos === Position(1, 13))
 
     val getOptionCmd = parseUniqueCmd("(get-option :keyword)")
-    val GetOption(keyword2) = getOptionCmd
+    val GetOption(keyword2) = getOptionCmd: @unchecked
     assert(getOptionCmd.getPos === Position(1, 1))
     assert(keyword2.getPos === Position(1, 13))
   }
 
   test("Commands over multiple lines have correct positions") {
     val script =
-"""(get-assertions)
-(check-sat)
-(exit)"""
+      """(get-assertions)
+        |(check-sat)
+        |(exit)""".stripMargin
 
     val reader = new StringReader(script)
     val lexer = new Lexer(reader)

@@ -38,9 +38,9 @@ object Terms {
 
   //(_ map or)
   object ExtendedIdentifier {
-    
+
     def apply(symbol: SSymbol, extension: SSymbol) = Identifier(symbol, Seq(extension))
-    
+
     def unapply(id: Identifier): Option[(SSymbol, SSymbol)] = id match {
       case Identifier(sym, Seq(ext@SSymbol(_))) => Some((sym, ext))
       case _ => None
@@ -56,7 +56,7 @@ object Terms {
   }
 
   /* TODO
-     Should we have an abstract class attribute and a bunch of predefined 
+     Should we have an abstract class attribute and a bunch of predefined
      attributes along with a default non-standard attribute? */
   case class Attribute(keyword: SKeyword, value: Option[AttributeValue]) extends Tree with Positioned
   object Attribute {
@@ -202,13 +202,14 @@ object Commands {
     def transform(tt: TreeTransformer)(context: tt.C): (Command, tt.R)
   }
 
-  //non standard declare-datatypes (no support for parametric types)
   case class DeclareDatatypes(datatypes: Seq[(SSymbol, Seq[Constructor])]) extends CommandExtension {
     override def print(ctx: PrintingContext): Unit = {
-      ctx.print("(declare-datatypes () ")
+      ctx.print("(declare-datatypes ")
       ctx.printNary(datatypes, (datatype: (SSymbol, Seq[Constructor])) => {
-        ctx.print("(")
-        ctx.print(datatype._1.name)
+        ctx.print(datatype._1)
+        ctx.print(" 0") // 0-arity
+      }, "((", ") (", "))")
+      ctx.printNary(datatypes, (datatype: (SSymbol, Seq[Constructor])) => {
         if (datatype._2.nonEmpty) ctx.printNary(datatype._2, (constructor: Constructor) => {
           ctx.print("(")
           ctx.print(constructor.sym.name)
@@ -220,9 +221,8 @@ object Commands {
             ctx.print(")")
           }, " ", " ", "")
           ctx.print(")")
-        }, " ", " ", "")
-        ctx.print(")")
-      }, "(", " ", "))\n")
+        }, " ", " ", " ")
+      }, "(\n  (", ")\n  (", ")\n))")
     }
 
     override def transform(tt: TreeTransformer)(context: tt.C): (Command, tt.R) = {
@@ -258,7 +258,7 @@ object Commands {
 
   case class Constructor(sym: SSymbol, fields: Seq[(SSymbol, Sort)])
 
-  /* 
+  /*
    * Info flags can be queried with get-info command and
    * the SMT solver should support the following set of standard
    * flags. Additional solver-specific flags are supported via the general
@@ -294,27 +294,6 @@ object Commands {
   case class ReproducibleResourceLimit(value: Int) extends SMTOption
   case class Verbosity(value: Int) extends SMTOption
   case class AttributeOption(attribute: Attribute) extends SMTOption
-
-  @deprecated("The solver option :interactive-mode has been renamed :produce-assertions. Use ProduceAssertions instead", "SMT-LIB 2.5")
-  class InteractiveMode(val value: Boolean) extends SMTOption {
-
-    override def equals(o: Any): Boolean = o != null && (o match {
-      case (that: InteractiveMode) => this.value == that.value
-      case _ => false
-    })
-
-    override def hashCode = value.hashCode
-  }
-
-  @deprecated("The solver option :interactive-mode has been renamed :produce-assertions. Use ProduceAssertions instead", "SMT-LIB 2.5")
-  object InteractiveMode {
-    def apply(value: Boolean) = new InteractiveMode(value)
-    def unapply(opt: SMTOption): Option[Boolean] = opt match {
-      case (im: InteractiveMode) => Some(im.value)
-      case _ => None
-    }
-  }
-
 
   trait Logic extends Positioned
 
@@ -446,10 +425,10 @@ object CommandsResponses {
   sealed trait GetValueResponse extends CommandResponse
 
 
-  sealed trait AllResponseKind extends GenResponse 
+  sealed trait AllResponseKind extends GenResponse
                                with CheckSatResponse with EchoResponse
-                               with GetAssertionsResponse with GetAssignmentResponse 
-                               with GetInfoResponse with GetModelResponse 
+                               with GetAssertionsResponse with GetAssignmentResponse
+                               with GetInfoResponse with GetModelResponse
                                with GetOptionResponse with GetProofResponse
                                with GetUnsatAssumptionsResponse
                                with GetUnsatCoreResponse with GetValueResponse
@@ -465,22 +444,22 @@ object CommandsResponses {
    * As well as one of the response kind.
    */
 
-  case object Success extends 
+  case object Success extends
     GenResponse with SuccessfulResponse
 
-  case class CheckSatStatus(status: Status) extends 
+  case class CheckSatStatus(status: Status) extends
     CheckSatResponse with SuccessfulResponse
 
-  case class EchoResponseSuccess(value: String) extends 
+  case class EchoResponseSuccess(value: String) extends
     EchoResponse with SuccessfulResponse
 
-  case class GetAssertionsResponseSuccess(assertions: Seq[Term]) extends 
+  case class GetAssertionsResponseSuccess(assertions: Seq[Term]) extends
     GetAssertionsResponse with SuccessfulResponse
 
   case class GetAssignmentResponseSuccess(valuationPairs: Seq[(SSymbol, Boolean)]) extends
     GetAssignmentResponse with SuccessfulResponse
 
-  case class GetInfoResponseSuccess(info: InfoResponse, infos: Seq[InfoResponse]) extends 
+  case class GetInfoResponseSuccess(info: InfoResponse, infos: Seq[InfoResponse]) extends
     GetInfoResponse with SuccessfulResponse
 
   /*
@@ -489,22 +468,22 @@ object CommandsResponses {
    * not the same type as Command)
    * TODO: SMTLIB 2.5 has a new standard for get-model
    */
-  case class GetModelResponseSuccess(model: List[SExpr]) 
+  case class GetModelResponseSuccess(model: List[SExpr])
     extends GetModelResponse with SuccessfulResponse
 
-  case class GetOptionResponseSuccess(attributeValue: AttributeValue) extends 
+  case class GetOptionResponseSuccess(attributeValue: AttributeValue) extends
     GetOptionResponse with SuccessfulResponse
 
-  case class GetProofResponseSuccess(proof: SExpr) extends 
+  case class GetProofResponseSuccess(proof: SExpr) extends
     GetProofResponse with SuccessfulResponse
 
-  case class GetUnsatAssumptionsResponseSuccess(props: Seq[PropLiteral]) extends 
+  case class GetUnsatAssumptionsResponseSuccess(props: Seq[PropLiteral]) extends
     GetUnsatAssumptionsResponse with SuccessfulResponse
 
-  case class GetUnsatCoreResponseSuccess(symbols: Seq[SSymbol]) extends 
+  case class GetUnsatCoreResponseSuccess(symbols: Seq[SSymbol]) extends
     GetUnsatCoreResponse with SuccessfulResponse
 
-  case class GetValueResponseSuccess(valuationPairs: Seq[(Term, Term)]) extends 
+  case class GetValueResponseSuccess(valuationPairs: Seq[(Term, Term)]) extends
     GetValueResponse with SuccessfulResponse
 
   abstract class CommandResponseExtension extends CommandResponse {

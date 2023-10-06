@@ -1,52 +1,62 @@
 package smtlib
 package it
 
-import scala.sys.process._
-
 import org.scalatest.funsuite.AnyFunSuite
-
-import java.io.File
-import java.io.FileReader
-
-import interpreters._
-
-import trees.Terms._
-import trees.Commands._
-import trees.CommandsResponses._
+import smtlib.trees.Commands._
+import smtlib.trees.CommandsResponses._
+import smtlib.trees.Terms._
 
 
 /** Checks that formula build with theories module are correctly handled by solvers */
 class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
 
+  def mkTest(formula: Term, expectedStatus: Status, prefix: String): Unit = mkTest(Nil, formula, expectedStatus, prefix)
 
-  def mkTest(formula: Term, expectedStatus: Status, prefix: String) = {
-
-    if(isZ3Available) {
-      test(prefix + ": with Z3") {
-        val z3Interpreter = getZ3Interpreter
-        val assertion = Assert(formula)
-        assert(z3Interpreter.eval(assertion) === Success)
-        val res = z3Interpreter.eval(CheckSat())
+  def mkTest(cmds: List[Command], formula: Term, expectedStatus: Status, prefix: String): Unit = {
+    def runAndCheck(mkInterp: => Interpreter): Unit = {
+      val interp = mkInterp
+      for (cmd <- cmds) {
+        val res = interp.eval(cmd)
         res match {
-          case CheckSatStatus(status) => assert(status === expectedStatus)
-          case res => assert(false, "expected a check sat status, but got: " + res)
+          case Success => ()
+          case other => fail(s"expected a success, but got: $other")
         }
+      }
+      val assertion = Assert(formula)
+      assert(interp.eval(assertion) === Success)
+      val res = interp.eval(CheckSat())
+      res match {
+        case CheckSatStatus(status) => assert(status === expectedStatus)
+        case other => fail(s"expected a check sat status, but got: $other")
       }
     }
 
-    if(isCVC4Available) {
-      test(prefix + ": with CVC4") {
-        val cvc4Interpreter = getCVC4Interpreter
-        val assertion = Assert(formula)
-        assert(cvc4Interpreter.eval(assertion) === Success)
-        val res = cvc4Interpreter.eval(CheckSat())
-        res match {
-          case CheckSatStatus(status) => assert(status === expectedStatus)
-          case res => assert(false, "expected a check sat status, but got: " + res)
-        }
+    val z3Test = prefix + ": with Z3"
+    if (isZ3Available) {
+      test(z3Test) {
+        runAndCheck(getZ3Interpreter)
       }
+    } else {
+      ignore(z3Test) {}
     }
 
+    val cvc4Test = prefix + ": with CVC4"
+    if (isCVC4Available) {
+      test(cvc4Test) {
+        runAndCheck(getCVC4Interpreter)
+      }
+    } else {
+      ignore(cvc4Test) {}
+    }
+
+    val cvc5Test = prefix + ": with cvc5"
+    if (isCVC5Available) {
+      test(cvc5Test) {
+        runAndCheck(getCVC5Interpreter)
+      }
+    } else {
+      ignore(cvc5Test) {}
+    }
   }
 
 
@@ -146,8 +156,8 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
 
   {
     import theories.Core.Equals
-    import theories.Ints.NumeralLit
     import theories.FixedSizeBitVectors._
+    import theories.Ints.NumeralLit
     val theoryString = "Theory of Bit Vectors"
     var counter = 0
     def uniqueName(): String = {
@@ -213,5 +223,70 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
 
     val f20 = Equals(Mul(BitVectorConstant(1, 32), BitVectorConstant(2, 32), BitVectorConstant(3, 32), BitVectorConstant(4, 32)), BitVectorConstant(24, 32))
     mkTest(f20, SatStatus, uniqueName())
+  }
+
+  {
+    import theories.Core._
+    import theories.Ints._
+    val theoryADTs = "Theory of ADTs"
+    var counter = 0
+
+    def uniqueName(): String = {
+      counter += 1
+      "%d - %s".format(counter, theoryADTs)
+    }
+
+    val list = SSymbol("MyList")
+    val listSort = Sort(Identifier(list))
+    val nil = SSymbol("Nil")
+    val cons = SSymbol("Cons")
+    val head = SSymbol("head")
+    val tail = SSymbol("tail")
+    val listCtors = List(
+      Constructor(nil, Seq.empty),
+      Constructor(cons, Seq((head, IntSort()), (tail, listSort)))
+    )
+
+    def consApp(hd: Term, tl: Term): Term =
+      FunctionApplication(
+        QualifiedIdentifier(Identifier(cons), Some(listSort)),
+        Seq(hd, tl)
+      )
+
+    def nilApp: Term =
+      QualifiedIdentifier(Identifier(nil), Some(listSort))
+
+    val x = QualifiedIdentifier(Identifier(SSymbol("x")), Some(IntSort()))
+    val y = QualifiedIdentifier(Identifier(SSymbol("y")), Some(IntSort()))
+    val z = QualifiedIdentifier(Identifier(SSymbol("z")), Some(listSort))
+    val a = QualifiedIdentifier(Identifier(SSymbol("a")), Some(IntSort()))
+    val b = QualifiedIdentifier(Identifier(SSymbol("b")), Some(IntSort()))
+    val c = QualifiedIdentifier(Identifier(SSymbol("c")), Some(IntSort()))
+
+    val ids = Seq(x, y, z, a, b, c)
+    val idsDecls = ids.map(id => DeclareFun(id.id.symbol, Seq.empty, id.sort.get))
+
+    mkTest(
+      List(DeclareDatatypes(List((list, listCtors)))) ++ idsDecls,
+      Equals(
+        consApp(x, consApp(y, z)),
+        consApp(a, consApp(b, consApp(c, nilApp)))
+      ),
+      SatStatus,
+      uniqueName()
+    )
+
+    mkTest(
+      List(DeclareDatatypes(List((list, listCtors)))) ++ idsDecls,
+      And(
+        Equals(
+          consApp(x, consApp(y, z)),
+          consApp(a, consApp(b, consApp(c, nilApp)))
+        ),
+        Not(Equals(z, consApp(c, nilApp)))
+      ),
+      UnsatStatus,
+      uniqueName()
+    )
   }
 }

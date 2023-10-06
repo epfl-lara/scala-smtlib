@@ -64,14 +64,14 @@ class ParserTests extends AnyFunSuite with TimeLimits {
     assert(parseAttribute(":test 42") === Attribute(SKeyword("test"), Some(SNumeral(42))))
     assert(parseAttribute(""":test "hello" """) === Attribute(SKeyword("test"), Some(SString("hello"))))
     assert(parseAttribute(""":test 23.12 """) === Attribute(SKeyword("test"), Some(SDecimal(23.12))))
-    assert(parseAttribute(""":test (abc def) """) === 
-                          Attribute(SKeyword("test"), 
+    assert(parseAttribute(""":test (abc def) """) ===
+                          Attribute(SKeyword("test"),
                                     Some(SList(
                                           List(SSymbol("abc"), SSymbol("def"))))
                                    ))
     assert(parseAttribute(""":left-assoc""") === Attribute(SKeyword("left-assoc")))
     assert(parseAttribute(""":status unsat""") === Attribute(SKeyword("status"), Some(SSymbol("unsat"))))
-    assert(parseAttribute(""":my_attribute (humpty dumpty)""") ===  
+    assert(parseAttribute(""":my_attribute (humpty dumpty)""") ===
            Attribute(SKeyword("my_attribute"), Some(SList(List(SSymbol("humpty"), SSymbol("dumpty"))))))
     assert(parseAttribute(""":authors "Jack and Jill" """) === Attribute(SKeyword("authors"), Some(SString("Jack and Jill"))))
   }
@@ -89,12 +89,12 @@ class ParserTests extends AnyFunSuite with TimeLimits {
     assert(parseSort("(A B)") === Sort("A", Seq(Sort("B"))))
     assert(parseSort("(Array From To)") === Sort("Array", Seq(Sort("From"), Sort("To"))))
     assert(parseSort("(_ A 42)") === Sort(Identifier("A", Seq(42))))
-    assert(parseSort("(List (Array Int Real))") === 
+    assert(parseSort("(List (Array Int Real))") ===
                      Sort("List", Seq(
                                     Sort("Array", Seq(Sort("Int"), Sort("Real")))
                                   )
                          ))
-    assert(parseSort("((_ FixedSizeList 4) Real)") === 
+    assert(parseSort("((_ FixedSizeList 4) Real)") ===
                      Sort(Identifier("FixedSizeList", Seq(4)), Seq(Sort("Real"))))
     assert(parseSort("(Set (_ Bitvec 3))") === Sort(Identifier("Set"), Seq(Sort(Identifier("Bitvec", Seq(3))))))
   }
@@ -158,15 +158,15 @@ class ParserTests extends AnyFunSuite with TimeLimits {
   }
 
   test("Parsing function applications") {
-    assert(parseUniqueTerm("(f a b)") === 
+    assert(parseUniqueTerm("(f a b)") ===
            FunctionApplication(
             QualifiedIdentifier("f"), Seq(QualifiedIdentifier("a"), QualifiedIdentifier("b"))))
 
-    assert(parseUniqueTerm("(f (g a b) c)") === 
+    assert(parseUniqueTerm("(f (g a b) c)") ===
            FunctionApplication(
             QualifiedIdentifier("f"), Seq(
               FunctionApplication(
-                QualifiedIdentifier("g"), 
+                QualifiedIdentifier("g"),
                 Seq(QualifiedIdentifier("a"), QualifiedIdentifier("b"))
               ),
               QualifiedIdentifier("c"))))
@@ -180,8 +180,8 @@ class ParserTests extends AnyFunSuite with TimeLimits {
            Let(VarBinding("a", QualifiedIdentifier("x")), Seq(), QualifiedIdentifier("a")))
 
     assert(parseUniqueTerm("(let ((a x) (b y)) (f a b))") ===
-           Let(VarBinding("a", QualifiedIdentifier("x")), 
-               Seq(VarBinding("b", QualifiedIdentifier("y"))), 
+           Let(VarBinding("a", QualifiedIdentifier("x")),
+               Seq(VarBinding("b", QualifiedIdentifier("y"))),
                FunctionApplication(QualifiedIdentifier("f"),
                 Seq(QualifiedIdentifier("a"), QualifiedIdentifier("b")))))
   }
@@ -201,9 +201,9 @@ class ParserTests extends AnyFunSuite with TimeLimits {
   test("Let with binding to complex term works as expected") {
     assert(parseUniqueTerm("(let ((a (f x y))) 42)") ===
            Let(
-            VarBinding("a", 
+            VarBinding("a",
               FunctionApplication(QualifiedIdentifier("f"),
-                                  Seq(QualifiedIdentifier("x"), 
+                                  Seq(QualifiedIdentifier("x"),
                                       QualifiedIdentifier("y")))),
             Seq(),
             SNumeral(42)))
@@ -215,7 +215,7 @@ class ParserTests extends AnyFunSuite with TimeLimits {
            Forall(SortedVar("a", Sort("A")), Seq(), QualifiedIdentifier("a"))
           )
     assert(parseUniqueTerm("(forall ((a A) (b B) (c C)) (f a c))") ===
-           Forall(SortedVar("a", Sort("A")), 
+           Forall(SortedVar("a", Sort("A")),
                   Seq(SortedVar("b", Sort("B")), SortedVar("c", Sort("C"))),
                   FunctionApplication(QualifiedIdentifier("f"),
                     Seq(QualifiedIdentifier("a"), QualifiedIdentifier("c")))))
@@ -224,7 +224,7 @@ class ParserTests extends AnyFunSuite with TimeLimits {
            Exists(SortedVar("a", Sort("A")), Seq(), QualifiedIdentifier("a"))
           )
     assert(parseUniqueTerm("(exists ((a A) (b B) (c C)) (f a c))") ===
-           Exists(SortedVar("a", Sort("A")), 
+           Exists(SortedVar("a", Sort("A")),
                   Seq(SortedVar("b", Sort("B")), SortedVar("c", Sort("C"))),
                   FunctionApplication(QualifiedIdentifier("f"),
                     Seq(QualifiedIdentifier("a"), QualifiedIdentifier("c")))))
@@ -245,7 +245,7 @@ class ParserTests extends AnyFunSuite with TimeLimits {
           )
     assert(parseUniqueTerm("(! (f a) :note abcd)") ===
            AnnotatedTerm(
-            FunctionApplication(QualifiedIdentifier("f"), Seq(QualifiedIdentifier("a"))), 
+            FunctionApplication(QualifiedIdentifier("f"), Seq(QualifiedIdentifier("a"))),
             Attribute(SKeyword("note"), Some(SSymbol("abcd"))), Seq())
           )
 
@@ -258,7 +258,7 @@ class ParserTests extends AnyFunSuite with TimeLimits {
   }
 
   test("Parsing complicated terms") {
-    assert(parseUniqueTerm("((_ f 1) a b)") === 
+    assert(parseUniqueTerm("((_ f 1) a b)") ===
            FunctionApplication(
             QualifiedIdentifier(Identifier("f", Seq(1))),
             Seq(QualifiedIdentifier("a"), QualifiedIdentifier("b"))))
@@ -268,7 +268,7 @@ class ParserTests extends AnyFunSuite with TimeLimits {
       Let(VarBinding("x", SNumeral(42)),
           Seq(),
           FunctionApplication(
-            QualifiedIdentifier("f"), 
+            QualifiedIdentifier("f"),
             Seq(QualifiedIdentifier("x"), QualifiedIdentifier("a")))))
 
     assert(
@@ -324,7 +324,7 @@ class ParserTests extends AnyFunSuite with TimeLimits {
     assert(parseUniqueSExpr(""" "hey there" """) === SString("hey there"))
     assert(parseUniqueSExpr("abcd") === SSymbol("abcd"))
     assert(parseUniqueSExpr(":abcd") === SKeyword("abcd"))
-    assert(parseUniqueSExpr("(abc def 42)") === 
+    assert(parseUniqueSExpr("(abc def 42)") ===
       SList(SSymbol("abc"), SSymbol("def"), SNumeral(42)))
   }
 
@@ -388,18 +388,18 @@ class ParserTests extends AnyFunSuite with TimeLimits {
 
   test("interactive parser") {
     val pis = new SynchronousPipedReader
-    val lexer = failAfter(3 seconds) { new Lexer(pis) }
-    val parser = failAfter(3 seconds) { new Parser(lexer) }
+    val lexer = failAfter(3.seconds) { new Lexer(pis) }
+    val parser = failAfter(3.seconds) { new Parser(lexer) }
 
     pis.write("(set-logic QF_LRA)")
     assert(parser.parseCommand === SetLogic(QF_LRA()))
 
     pis.write("(assert (< 1 3))")
-    assert(parser.parseCommand === 
+    assert(parser.parseCommand ===
            Assert(FunctionApplication(
              QualifiedIdentifier("<"),
              Seq(
-               SNumeral(1), 
+               SNumeral(1),
                SNumeral(3)
              )
            )))
@@ -425,15 +425,17 @@ class ParserTests extends AnyFunSuite with TimeLimits {
     val extId = ExtendedIdentifier(abc, ext)
     assert(extId === Identifier(abc, Seq(ext)))
     extId match {
-      case ExtendedIdentifier(a, b) => 
+      case ExtendedIdentifier(a, b) =>
         assert(a === abc)
         assert(b === ext)
+      case _ => assert(false)
     }
     extId match {
       case SimpleIdentifier(sym) => assert(false)
-      case ExtendedIdentifier(a, b) => 
+      case ExtendedIdentifier(a, b) =>
         assert(a === abc)
         assert(b === ext)
+      case _ => assert(false)
     }
 
   }

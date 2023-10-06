@@ -22,144 +22,151 @@ trait ParserCommands { this: ParserCommon with ParserTerms =>
     Script(cmds.toList)
   }
 
-  protected def parseCommandWithoutParens: Command = nextToken().kind match {
-    case Tokens.Assert => {
-      Assert(parseTerm)
-    }
-    case Tokens.CheckSat => CheckSat()
-    case Tokens.CheckSatAssuming => {
-      val props = parseMany(() => parsePropLit)
-      CheckSatAssuming(props)
-    }
+  protected def parseCommandWithoutParens: Command = {
+    val tok = nextToken()
+    tok.kind match {
+      case Tokens.Assert =>
+        Assert(parseTerm)
 
-    case Tokens.DeclareConst => {
-      val name = parseSymbol
-      val sort = parseSort
-      DeclareConst(name, sort)
-    }
-    case Tokens.DeclareFun => {
-      val sym = parseSymbol
+      case Tokens.CheckSat => CheckSat()
+      case Tokens.CheckSatAssuming =>
+        val props = parseMany(() => parsePropLit)
+        CheckSatAssuming(props)
 
-      val params = new ListBuffer[Sort]
-      eat(Tokens.OParen)
-      while(peekToken.kind != Tokens.CParen)
-        params.append(parseSort)
-      eat(Tokens.CParen)
+      case Tokens.DeclareConst =>
+        val name = parseSymbol
+        val sort = parseSort
+        DeclareConst(name, sort)
 
-      val sort = parseSort
-      DeclareFun(sym, params.toList, sort)
-    }
-    case Tokens.DeclareSort => {
-      val sym = parseSymbol
-      val arity = parseNumeral
-      DeclareSort(sym, arity.value.toInt)
-    }
+      case Tokens.DeclareFun =>
+        val sym = parseSymbol
 
-    case Tokens.DefineFun => {
-      val funDef = parseFunDef
-      DefineFun(funDef)
-    }
-    case Tokens.DefineFunRec => {
-      val funDef = parseFunDef
-      DefineFunRec(funDef)
-    }
-    case Tokens.DefineFunsRec => {
-      val (funDef, funDefs) = parseOneOrMore(() => parseWithin(Tokens.OParen, Tokens.CParen)(() => parseFunDec))
-      val (body, bodies) = parseOneOrMore(() => parseTerm)
-      assert(funDefs.size == bodies.size)
-      DefineFunsRec(funDef +: funDefs, body +: bodies)
-    }
-    case Tokens.DefineSort => {
-      val sym = parseSymbol
+        val params = new ListBuffer[Sort]
+        eat(Tokens.OParen)
+        while(peekToken.kind != Tokens.CParen)
+          params.append(parseSort)
+        eat(Tokens.CParen)
 
-      val vars = new ListBuffer[SSymbol]
-      eat(Tokens.OParen)
-      while(peekToken.kind != Tokens.CParen)
-        vars.append(parseSymbol)
-      eat(Tokens.CParen)
+        val sort = parseSort
+        DeclareFun(sym, params.toList, sort)
 
-      val sort = parseSort
-      DefineSort(sym, vars.toList, sort)
-    }
+      case Tokens.DeclareSort =>
+        val sym = parseSymbol
+        val arity = parseNumeral
+        DeclareSort(sym, arity.value.toInt)
 
-    case Tokens.Echo => {
-      val value = parseString
-      Echo(value)
-    }
-    case Tokens.Exit => Exit()
+      case Tokens.DefineFun =>
+        val funDef = parseFunDef
+        DefineFun(funDef)
 
-    case Tokens.GetAssertions => GetAssertions()
-    case Tokens.GetAssignment => GetAssignment()
+      case Tokens.DefineFunRec =>
+        val funDef = parseFunDef
+        DefineFunRec(funDef)
 
-    case Tokens.GetInfo => {
-      val infoFlag = parseInfoFlag
-      GetInfo(infoFlag)
-    }
+      case Tokens.DefineFunsRec =>
+        val (funDef, funDefs) = parseOneOrMore(() => parseWithin(Tokens.OParen, Tokens.CParen)(() => parseFunDec))
+        val (body, bodies) = parseOneOrMore(() => parseTerm)
+        assert(funDefs.size == bodies.size)
+        DefineFunsRec(funDef +: funDefs, body +: bodies)
 
-    case Tokens.GetModel => GetModel()
+      case Tokens.DefineSort =>
+        val sym = parseSymbol
 
-    case Tokens.GetOption => {
-      val keyword = parseKeyword
-      GetOption(keyword)
-    }
+        val vars = new ListBuffer[SSymbol]
+        eat(Tokens.OParen)
+        while(peekToken.kind != Tokens.CParen)
+          vars.append(parseSymbol)
+        eat(Tokens.CParen)
 
-    case Tokens.GetProof => GetProof()
-    case Tokens.GetUnsatAssumptions => GetUnsatAssumptions()
-    case Tokens.GetUnsatCore => GetUnsatCore()
+        val sort = parseSort
+        DefineSort(sym, vars.toList, sort)
 
-    case Tokens.GetValue => {
-      eat(Tokens.OParen)
-      val ts = new ListBuffer[Term]
-      while(peekToken.kind != Tokens.CParen)
-        ts.append(parseTerm)
-      eat(Tokens.CParen)
-      GetValue(ts.head, ts.tail.toList)
-    }
+      case Tokens.Echo =>
+        val value = parseString
+        Echo(value)
 
-    case Tokens.Pop => {
-      val n = parseNumeral
-      Pop(n.value.toInt)
-    }
-    case Tokens.Push => {
-      val n = parseNumeral
-      Push(n.value.toInt)
-    }
+      case Tokens.Exit => Exit()
 
-    case Tokens.Reset => Reset()
-    case Tokens.ResetAssertions => ResetAssertions()
+      case Tokens.GetAssertions => GetAssertions()
+      case Tokens.GetAssignment => GetAssignment()
 
-    case Tokens.SetInfo => {
-      SetInfo(parseAttribute)
-    }
+      case Tokens.GetInfo =>
+        val infoFlag = parseInfoFlag
+        GetInfo(infoFlag)
 
-    case Tokens.SetLogic => {
-      val logicSymbol: SSymbol = parseSymbol
-      val logic: Logic = 
-        Logic.standardLogicFromString.lift(logicSymbol.name).getOrElse({
-          logicSymbol match {
-            case SSymbol("ALL") => ALL()
-            case _ => NonStandardLogic(logicSymbol)
-          }
-        })
-      SetLogic(logic.setPos(logicSymbol))
-    }
-    case Tokens.SetOption => {
-      SetOption(parseOption)
-    }
+      case Tokens.GetModel => GetModel()
 
-    case Tokens.DeclareDatatypes => {
-      eat(Tokens.OParen)
-      eat(Tokens.CParen)
+      case Tokens.GetOption =>
+        val keyword = parseKeyword
+        GetOption(keyword)
 
-      val datatypes = parseMany(() => parseDatatypes)
+      case Tokens.GetProof => GetProof()
+      case Tokens.GetUnsatAssumptions => GetUnsatAssumptions()
+      case Tokens.GetUnsatCore => GetUnsatCore()
 
-      DeclareDatatypes(datatypes)
-    }
+      case Tokens.GetValue =>
+        eat(Tokens.OParen)
+        val ts = new ListBuffer[Term]
+        while(peekToken.kind != Tokens.CParen)
+          ts.append(parseTerm)
+        eat(Tokens.CParen)
+        GetValue(ts.head, ts.tail.toList)
 
-    case kind => {
-      throw new UnknownCommandException(kind)
+      case Tokens.Pop =>
+        val n = parseNumeral
+        Pop(n.value.toInt)
+
+      case Tokens.Push =>
+        val n = parseNumeral
+        Push(n.value.toInt)
+
+      case Tokens.Reset => Reset()
+      case Tokens.ResetAssertions => ResetAssertions()
+
+      case Tokens.SetInfo =>
+        SetInfo(parseAttribute)
+
+      case Tokens.SetLogic =>
+        val logicSymbol: SSymbol = parseSymbol
+        val logic: Logic =
+          Logic.standardLogicFromString.lift(logicSymbol.name).getOrElse({
+            logicSymbol match {
+              case SSymbol("ALL") => ALL()
+              case _ => NonStandardLogic(logicSymbol)
+            }
+          })
+        SetLogic(logic.setPos(logicSymbol))
+
+      case Tokens.SetOption =>
+        SetOption(parseOption)
+
+      case Tokens.DeclareDatatypes =>
+        val names = parseMany(() => parseSortDecl)
+        val ctorss = parseMany(() => parseConstructors)
+        if (names.size != ctorss.size) {
+          throw new IllformedCommandException(tok, "Sort and datatypes declaration do not correspond")
+        }
+        DeclareDatatypes(names.zip(ctorss))
+
+      case kind =>
+        throw new UnknownCommandException(kind)
     }
   }
+
+  def parseSortDecl: SSymbol = {
+    eat(Tokens.OParen)
+    val name = parseSymbol
+    val arity = eat(Tokens.NumeralLitKind)
+    arity match {
+      case Tokens.NumeralLit(n) =>
+        if (n != 0) throw new UnsupportedException(s"Parametric sort is unsupported (position ${arity.getPos})")
+      case _ =>
+        assert(false) // Unreachable because we expect a numeral
+    }
+    eat(Tokens.CParen)
+    name
+  }
+
 
   def parseCommand: Command = if(peekToken == null) null else {
     val head = nextToken()
@@ -211,6 +218,7 @@ trait ParserCommands { this: ParserCommon with ParserTerms =>
     FunDef(name, sortedVars, sort, body)
   }
 
+  // SMT 2.5 & TIP
   def parseDatatypes: (SSymbol, Seq[Constructor]) = {
     eat(Tokens.OParen)
     val name = parseSymbol
@@ -220,6 +228,17 @@ trait ParserCommands { this: ParserCommon with ParserTerms =>
     }
     eat(Tokens.CParen)
     (name, constructors.toSeq)
+  }
+
+  // SMT 2.6+
+  def parseConstructors: Seq[Constructor] = {
+    eat(Tokens.OParen)
+    val constructors = new ListBuffer[Constructor]
+    while(peekToken.kind != Tokens.CParen) {
+      constructors.append(parseConstructor)
+    }
+    eat(Tokens.CParen)
+    constructors.toSeq
   }
 
   def parseConstructor: Constructor = {
@@ -260,56 +279,53 @@ trait ParserCommands { this: ParserCommon with ParserTerms =>
   def parseOption: SMTOption = {
     val peekPosition = peekToken.getPos
     val opt = peekToken match {
-      case Tokens.Keyword("diagnostic-output-channel") => 
+      case Tokens.Keyword("diagnostic-output-channel") =>
         nextToken()
         DiagnosticOutputChannel(parseString.value)
 
-      case Tokens.Keyword("global-declarations") => 
+      case Tokens.Keyword("global-declarations") =>
         nextToken()
         GlobalDeclarations(parseBool)
 
-      case Tokens.Keyword("interactive-mode") => 
-        nextToken()
-        InteractiveMode(parseBool)
       case Tokens.Keyword("print-success") =>
         nextToken()
         PrintSuccess(parseBool)
 
-      case Tokens.Keyword("produce-assertions") => 
+      case Tokens.Keyword("produce-assertions") =>
         nextToken()
         ProduceAssertions(parseBool)
-      case Tokens.Keyword("produce-assignments") => 
+      case Tokens.Keyword("produce-assignments") =>
         nextToken()
         ProduceAssignments(parseBool)
-      case Tokens.Keyword("produce-models") => 
+      case Tokens.Keyword("produce-models") =>
         nextToken()
         ProduceModels(parseBool)
-      case Tokens.Keyword("produce-proofs") => 
+      case Tokens.Keyword("produce-proofs") =>
         nextToken()
         ProduceProofs(parseBool)
-      case Tokens.Keyword("produce-unsat-assumptions") => 
+      case Tokens.Keyword("produce-unsat-assumptions") =>
         nextToken()
         ProduceUnsatAssumptions(parseBool)
-      case Tokens.Keyword("produce-unsat-cores") => 
+      case Tokens.Keyword("produce-unsat-cores") =>
         nextToken()
         ProduceUnsatCores(parseBool)
 
-      case Tokens.Keyword("random-seed") => 
+      case Tokens.Keyword("random-seed") =>
         nextToken()
         RandomSeed(parseNumeral.value.toInt)
 
-      case Tokens.Keyword("regular-output-channel") => 
+      case Tokens.Keyword("regular-output-channel") =>
         nextToken()
         RegularOutputChannel(parseString.value)
 
-      case Tokens.Keyword("reproducible-resource-limit") => 
+      case Tokens.Keyword("reproducible-resource-limit") =>
         nextToken()
         ReproducibleResourceLimit(parseNumeral.value.toInt)
-      case Tokens.Keyword("verbosity") => 
+      case Tokens.Keyword("verbosity") =>
         nextToken()
         Verbosity(parseNumeral.value.toInt)
 
-      case _ => 
+      case _ =>
         AttributeOption(parseAttribute)
     }
     opt.setPos(peekPosition)

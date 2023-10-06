@@ -31,7 +31,7 @@ class PrinterTests extends AnyFunSuite {
   private implicit def IntSeqToIndices(ns: Seq[Int]): Seq[Index] = ns.map(n => SNumeral(n))
 
   def mkTests(printer: Printer): Unit = {
-    implicit val p = printer
+    given p: Printer = printer
     val printerName = printer.name
     test(printerName + ": printing simple Terms") { testSimpleTerms }
     test(printerName + ": Printing tricky Terms") { testTrickyTerms }
@@ -58,7 +58,7 @@ class PrinterTests extends AnyFunSuite {
   mkTests(RecursivePrinter)
   mkTests(TailPrinter)
 
-  private def checkSort(sort: Sort)(implicit printer: Printer): Unit = {
+  private def checkSort(sort: Sort)(using printer: Printer): Unit = {
 
     val directPrint: String = printer.toString(sort)
 
@@ -70,7 +70,7 @@ class PrinterTests extends AnyFunSuite {
     assert(sort === parsedAgain)
   }
 
-  private def checkTerm(term: Term)(implicit printer: Printer): Unit = {
+  private def checkTerm(term: Term)(using printer: Printer): Unit = {
 
     val directPrint: String = printer.toString(term)
 
@@ -82,7 +82,7 @@ class PrinterTests extends AnyFunSuite {
     assert(term === parsedAgain)
   }
 
-  private def checkCommand(cmd: Command)(implicit printer: Printer): Unit = {
+  private def checkCommand(cmd: Command)(using printer: Printer): Unit = {
 
     val directPrint: String = printer.toString(cmd)
 
@@ -94,7 +94,7 @@ class PrinterTests extends AnyFunSuite {
     assert(cmd === parsedAgain)
   }
 
-  private def checkScript(script: Script)(implicit printer: Printer): Unit = {
+  private def checkScript(script: Script)(using printer: Printer): Unit = {
 
     val directPrint: String = printer.toString(script)
 
@@ -106,7 +106,7 @@ class PrinterTests extends AnyFunSuite {
     assert(script === parsedAgain)
   }
 
-  private def checkSExpr(sExpr: SExpr)(implicit printer: Printer): Unit = {
+  private def checkSExpr(sExpr: SExpr)(using printer: Printer): Unit = {
     //the AST can be different because a command would be printed as a list of symbol and then
     //parsed back as a list of symbols which is not the same object as the actual command
     //so we print/parse twice and check only after that
@@ -137,7 +137,7 @@ class PrinterTests extends AnyFunSuite {
   }
 
 
-  def testSimpleTerms(implicit printer: Printer): Unit = {
+  def testSimpleTerms(using printer: Printer): Unit = {
     checkTerm(SNumeral(0))
     checkTerm(SNumeral(42))
     checkTerm(SHexadecimal(Hexadecimal.fromString("FF").get))
@@ -158,19 +158,19 @@ class PrinterTests extends AnyFunSuite {
 
   }
 
-  def testTrickyTerms(implicit printer: Printer): Unit = {
+  def testTrickyTerms(using printer: Printer): Unit = {
     checkTerm(SString("abc\"def"))
     checkTerm(SString("hello \"World\""))
   }
 
-  def testWeirdSymbolNames(implicit printer: Printer): Unit = {
+  def testWeirdSymbolNames(using printer: Printer): Unit = {
     checkTerm(QualifiedIdentifier("+-/"))
     checkTerm(QualifiedIdentifier("^^^"))
     checkTerm(QualifiedIdentifier("+-/*=%?!.$_~&^<>@"))
     checkTerm(QualifiedIdentifier("$12%"))
   }
 
-  def testQuotedSymbols(implicit printer: Printer): Unit = {
+  def testQuotedSymbols(using printer: Printer): Unit = {
     checkTerm(QualifiedIdentifier("hey there"))
     checkTerm(QualifiedIdentifier(
 """hey there,
@@ -179,7 +179,7 @@ What are you up to man?"""))
     checkTerm(QualifiedIdentifier("semi;colon"))
   }
 
-  def testIndexedIdentifiers(implicit printer: Printer): Unit = {
+  def testIndexedIdentifiers(using printer: Printer): Unit = {
     checkTerm(QualifiedIdentifier(Identifier("id", Seq(1))))
     checkTerm(QualifiedIdentifier(Identifier("id", Seq(1, 2, 3))))
     checkTerm(QualifiedIdentifier(Identifier("id", Seq(SSymbol("index1")))))
@@ -187,7 +187,7 @@ What are you up to man?"""))
     checkTerm(QualifiedIdentifier(Identifier("id", Seq(SList(3, SList(4, 2), SSymbol("end"))))))
   }
 
-  def testComposedTerm(implicit printer: Printer): Unit = {
+  def testComposedTerm(using printer: Printer): Unit = {
     checkTerm(
       FunctionApplication(
         QualifiedIdentifier("f"),
@@ -225,7 +225,7 @@ What are you up to man?"""))
     )
   }
 
-  def testSorts(implicit printer: Printer): Unit = {
+  def testSorts(using printer: Printer): Unit = {
     checkSort(Sort(Identifier(SSymbol("A"))))
     checkSort(Sort(Identifier(SSymbol("A"), Seq(42))))
     checkSort(Sort(Identifier(SSymbol("A"), Seq(42, 23))))
@@ -234,7 +234,7 @@ What are you up to man?"""))
     checkSort(Sort(Identifier(SSymbol("A"), Seq(27)), Seq(Sort("B"), Sort("C"))))
   }
 
-  def testSingleCommands(implicit printer: Printer): Unit = {
+  def testSingleCommands(using printer: Printer): Unit = {
 
     checkCommand(Assert(QualifiedIdentifier("true")))
     checkCommand(CheckSat())
@@ -251,7 +251,7 @@ What are you up to man?"""))
           FunDec("g", Seq(SortedVar("a", Sort("A"))), Sort("B"))),
       Seq(FunctionApplication(QualifiedIdentifier("g"), Seq(QualifiedIdentifier("a"))),
           FunctionApplication(QualifiedIdentifier("f"), Seq(QualifiedIdentifier("a"))))))
-    checkCommand(DefineSort("A", Seq("B", "C"), 
+    checkCommand(DefineSort("A", Seq("B", "C"),
       Sort(Identifier("Array"), Seq(Sort("B"), Sort("C")))))
 
     checkCommand(Echo(SString("abcd")))
@@ -278,7 +278,7 @@ What are you up to man?"""))
 
   }
 
-  def testSetLogic(implicit printer: Printer): Unit = {
+  def testSetLogic(using printer: Printer): Unit = {
     checkCommand(SetLogic(ALL()))
     checkCommand(SetLogic(AUFLIA()))
     checkCommand(SetLogic(AUFLIRA()))
@@ -290,7 +290,7 @@ What are you up to man?"""))
     checkCommand(SetLogic(QF_AX()))
   }
 
-  def testDeclarationWeirdNames(implicit printer: Printer): Unit = {
+  def testDeclarationWeirdNames(using printer: Printer): Unit = {
     checkCommand(DeclareConst("<c>", Sort("C")))
     checkCommand(DeclareConst(SSymbol("abc def"), Sort("C")))
     checkCommand(DeclareConst("c", Sort("C D")))
@@ -326,16 +326,16 @@ What are you up to man?"""))
   }
 
 
-  def testDeclareDatatypes(implicit printer: Printer): Unit = {
+  def testDeclareDatatypes(using printer: Printer): Unit = {
     checkCommand(DeclareDatatypes(Seq(
-      SSymbol("A") -> Seq(Constructor(SSymbol("A1"), 
+      SSymbol("A") -> Seq(Constructor(SSymbol("A1"),
                                       Seq(SSymbol("a1a") -> Sort("A"), SSymbol("a1b") -> Sort("A"))),
-                          Constructor(SSymbol("A2"), 
+                          Constructor(SSymbol("A2"),
                                       Seq(SSymbol("a2a") -> Sort("A"), SSymbol("a2b") -> Sort("A"))))
     )))
   }
 
-  def testSetOptionCommand(implicit printer: Printer): Unit = {
+  def testSetOptionCommand(using printer: Printer): Unit = {
     checkCommand(SetOption(DiagnosticOutputChannel("toto")))
 
     checkCommand(SetOption(GlobalDeclarations(true)))
@@ -343,8 +343,6 @@ What are you up to man?"""))
 
     checkCommand(SetOption(PrintSuccess(true)))
     checkCommand(SetOption(PrintSuccess(false)))
-    checkCommand(SetOption(InteractiveMode(true)))
-    checkCommand(SetOption(InteractiveMode(false)))
 
     checkCommand(SetOption(ProduceAssertions(true)))
     checkCommand(SetOption(ProduceAssertions(false)))
@@ -375,17 +373,17 @@ What are you up to man?"""))
     checkCommand(SetOption(AttributeOption(Attribute(SKeyword("custom-flag"), Some(SSymbol("false"))))))
   }
 
-  def testSetInfoCommand(implicit printer: Printer): Unit = {
+  def testSetInfoCommand(using printer: Printer): Unit = {
     checkCommand(SetInfo(Attribute("test")))
     checkCommand(SetInfo(Attribute("data")))
     checkCommand(SetInfo(Attribute("authors", Some(SString("Regis Blanc")))))
-    checkCommand(SetInfo(Attribute("sources", 
+    checkCommand(SetInfo(Attribute("sources",
 Some(SSymbol(
 """This is a long quoted symbol.
 It spans a couple lines""")))))
   }
 
-  def testGetInfoCommand(implicit printer: Printer): Unit = {
+  def testGetInfoCommand(using printer: Printer): Unit = {
     checkCommand(GetInfo(ErrorBehaviorInfoFlag()))
     checkCommand(GetInfo(NameInfoFlag()))
     checkCommand(GetInfo(AuthorsInfoFlag()))
@@ -395,7 +393,7 @@ It spans a couple lines""")))))
     checkCommand(GetInfo(KeywordInfoFlag("custom")))
   }
 
-  def testSimpleScript(implicit printer: Printer): Unit = {
+  def testSimpleScript(using printer: Printer): Unit = {
     val script = Script(List(
       SetLogic(QF_UF()),
       DeclareSort("MySort", 0),
@@ -407,21 +405,21 @@ It spans a couple lines""")))))
   }
 
 
-  def testCommandsResponses(implicit printer: Printer): Unit = {
+  def testCommandsResponses(using printer: Printer): Unit = {
 
-    def printGenRes(res: GenResponse): String = printer.toString(res) 
+    def printGenRes(res: GenResponse): String = printer.toString(res)
     def parseGenRes(in: String): GenResponse = Parser.fromString(in).parseGenResponse
     check(Success, printGenRes, parseGenRes)
     check(Unsupported, printGenRes, parseGenRes)
     check(Error("symbol missing"), printGenRes, parseGenRes)
 
-    def printCheckSat(res: CheckSatResponse): String = printer.toString(res) 
+    def printCheckSat(res: CheckSatResponse): String = printer.toString(res)
     def parseCheckSat(in: String): CheckSatResponse = Parser.fromString(in).parseCheckSatResponse
     check(CheckSatStatus(SatStatus), printCheckSat, parseCheckSat)
     check(CheckSatStatus(UnsatStatus), printCheckSat, parseCheckSat)
     check(CheckSatStatus(UnknownStatus), printCheckSat, parseCheckSat)
 
-    def printEcho(res: EchoResponse): String = printer.toString(res) 
+    def printEcho(res: EchoResponse): String = printer.toString(res)
     def parseEcho(in: String): EchoResponse = Parser.fromString(in).parseEchoResponse
     check(EchoResponseSuccess("abcd"), printEcho, parseEcho)
     check(EchoResponseSuccess("Hello, World"), printEcho, parseEcho)
@@ -436,7 +434,7 @@ It spans a couple lines""")))))
     def parseGetAssignment(in: String): GetAssignmentResponse = Parser.fromString(in).parseGetAssignmentResponse
     check(GetAssignmentResponseSuccess(Seq(
       (SSymbol("a"), true), (SSymbol("b"), false))),
-      printGetAssignment, 
+      printGetAssignment,
       parseGetAssignment)
 
     def printGetOption(res: GetOptionResponse): String = printer.toString(res)
@@ -453,7 +451,7 @@ It spans a couple lines""")))))
     check(GetUnsatAssumptionsResponseSuccess(Seq(PropLiteral(SSymbol("a"), true))),
           printGetUnsatAssumptions, parseGetUnsatAssumptions)
     check(GetUnsatAssumptionsResponseSuccess(
-            Seq(PropLiteral(SSymbol("a"), true), PropLiteral(SSymbol("b"), false))), 
+            Seq(PropLiteral(SSymbol("a"), true), PropLiteral(SSymbol("b"), false))),
           printGetUnsatAssumptions, parseGetUnsatAssumptions)
 
     def printGetUnsatCore(res: GetUnsatCoreResponse): String = printer.toString(res)
@@ -464,27 +462,27 @@ It spans a couple lines""")))))
 
     def printGetValue(res: GetValueResponse): String = printer.toString(res)
     def parseGetValue(in: String): GetValueResponse = Parser.fromString(in).parseGetValueResponse
-    check(GetValueResponseSuccess(Seq( 
-           (SSymbol("a"), SNumeral(42)) 
+    check(GetValueResponseSuccess(Seq(
+           (SSymbol("a"), SNumeral(42))
           )), printGetValue, parseGetValue)
-    check(GetValueResponseSuccess(Seq( 
-           (SSymbol("a"), SNumeral(42)), 
-           (SSymbol("b"), SNumeral(12)) 
+    check(GetValueResponseSuccess(Seq(
+           (SSymbol("a"), SNumeral(42)),
+           (SSymbol("b"), SNumeral(12))
          )), printGetValue, parseGetValue)
   }
 
-  def testGetAssignmentResponseQuotedSymbol(implicit printer: Printer): Unit = {
+  def testGetAssignmentResponseQuotedSymbol(using printer: Printer): Unit = {
     def printGetAssignment(res: GetAssignmentResponse): String = printer.toString(res)
     def parseGetAssignment(in: String): GetAssignmentResponse = Parser.fromString(in).parseGetAssignmentResponse
 
     check(GetAssignmentResponseSuccess(Seq(
       (SSymbol("quoted symbol"), true), (SSymbol("non-quoted-symbol"), false))),
-      printGetAssignment, 
+      printGetAssignment,
       parseGetAssignment)
 
   }
 
-  def testGetInfoResponses(implicit printer: Printer): Unit = {
+  def testGetInfoResponses(using printer: Printer): Unit = {
     def printGetInfo(res: GetInfoResponse): String = printer.toString(res)
     def parseGetInfo(in: String): GetInfoResponse = Parser.fromString(in).parseGetInfoResponse
 
@@ -520,7 +518,7 @@ It spans a couple lines""")))))
           printGetInfo, parseGetInfo)
   }
 
-  def testGetModelResponse(implicit printer: Printer): Unit = {
+  def testGetModelResponse(using printer: Printer): Unit = {
     def printGetModel(res: GetModelResponse): String = printer.toString(res)
     def parseGetModel(in: String): GetModelResponse = Parser.fromString(in).parseGetModelResponse
     check(
@@ -540,7 +538,7 @@ It spans a couple lines""")))))
     )
   }
 
-  def testSExprs(implicit printer: Printer): Unit = {
+  def testSExprs(using printer: Printer): Unit = {
     checkSExpr(SNumeral(12))
     checkSExpr(SString("Hey there"))
     checkSExpr(SSymbol("testsymbol"))
@@ -548,7 +546,7 @@ It spans a couple lines""")))))
     checkSExpr(SList(SList(SSymbol("hello"), SString("hello")), SNumeral(42)))
   }
 
-  def testSExprsSpecializedTrees(implicit printer: Printer): Unit = {
+  def testSExprsSpecializedTrees(using printer: Printer): Unit = {
     checkSExpr(CheckSat())
     checkSExpr(SetLogic(AUFLIA()))
     checkSExpr(FunctionApplication(
@@ -563,7 +561,7 @@ It spans a couple lines""")))))
 
   test("Printing deep trees with tail printer") {
     @tailrec
-    def mkDeepTerm(n: Int, t: Term): Term = 
+    def mkDeepTerm(n: Int, t: Term): Term =
       if(n == 0) t
       else mkDeepTerm(n-1, Let(VarBinding("x", SString("some value")), Seq(), t))
 
