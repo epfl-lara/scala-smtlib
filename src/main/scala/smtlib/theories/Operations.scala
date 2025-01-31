@@ -87,6 +87,24 @@ object Operations {
   }
 
   /**
+   * Operations with exactly four argument
+   */
+  trait Operation4 {
+    val name: String
+
+    def apply(t1 : Term, t2 : Term, t3 : Term, t4: Term): Term =
+      FunctionApplication(QualifiedIdentifier(Identifier(SSymbol(name))),
+                            Seq(t1, t2, t3, t4))
+
+    def unapply(t : Term): Option[(Term, Term, Term, Term)] = t match {
+      case FunctionApplication(
+            QualifiedIdentifier(Identifier(SSymbol(`name`), Seq()), None),
+            Seq(t1, t2, t3, t4)) => Some((t1, t2, t3, t4))
+      case _ => None
+    }
+  }
+
+  /**
    * Operations with variable number of arguments, requiring that the number of arguments is greater than least `numRequired`
    */
   trait OperationN {
