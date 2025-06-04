@@ -130,7 +130,7 @@ object ProcessInterpreter {
   private def ctorHelper(executable: String,
                          args: Array[String],
                          parserCtor: BufferedReader => Parser): (Parser, Process, BufferedWriter, BufferedReader, BufferedReader) = {
-    val process = java.lang.Runtime.getRuntime.exec((executable :: args.toList).mkString(" "))
+    val process = java.lang.Runtime.getRuntime.exec(executable +: args)
     val in = new BufferedWriter(new OutputStreamWriter(process.getOutputStream))
     val out = new BufferedReader(new InputStreamReader(process.getInputStream))
     val err = new BufferedReader(new InputStreamReader(process.getErrorStream))
