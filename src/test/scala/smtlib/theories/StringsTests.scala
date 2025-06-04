@@ -136,22 +136,22 @@ class StringsTests extends AnyFunSuite with Matchers {
     }
 
 
-    "\"abc\"" shouldParseTo
+    "\"abc\"" `shouldParseTo`
     StringLit("abc")
 
-    "(str.++ \"a\" \"bc\" )" shouldParseTo
+    "(str.++ \"a\" \"bc\" )" `shouldParseTo`
     Concat(StringLit("a"), StringLit("bc"))
 
-    "(str.++ \"a\" \"bc\" \"def\" )" shouldParseTo
+    "(str.++ \"a\" \"bc\" \"def\" )" `shouldParseTo`
     Concat(StringLit("a"), StringLit("bc"), StringLit("def"))
 
-    "(str.len \"abcd\")" shouldParseTo
+    "(str.len \"abcd\")" `shouldParseTo`
     Length(StringLit("abcd"))
 
-    "(str.at \"abcd\" 1)" shouldParseTo
+    "(str.at \"abcd\" 1)" `shouldParseTo`
     At(StringLit("abcd"), NumeralLit(1))
 
-    "(str.substr \"abcdef\" 2 5)" shouldParseTo
+    "(str.substr \"abcdef\" 2 5)" `shouldParseTo`
     Substring(StringLit("abcdef"), NumeralLit(2), NumeralLit(5))
   }
 }
