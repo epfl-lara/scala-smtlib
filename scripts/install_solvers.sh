@@ -3,9 +3,9 @@
 TEMP_DIR="${pwd}/temp"
 SOLVERS_DIR="$1"
 
-Z3_VER=${2-"4.14.0"}
+Z3_VER=${2-"4.15.1"}
 CVC4_VER=${3-"1.8"}
-CVC5_VER=${4-"1.1.2"}
+CVC5_VER=${4-"1.2.1"}
 
 mkdir -p "$SOLVERS_DIR"
 mkdir -p "$TEMP_DIR"
