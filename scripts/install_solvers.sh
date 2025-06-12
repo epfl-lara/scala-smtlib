@@ -3,19 +3,21 @@
 TEMP_DIR="$(pwd)/temp"
 SOLVERS_DIR="$1"
 
-Z3_VER=${2-"4.15.1"}
-CVC4_VER=${3-"1.8"}
-CVC5_VER=${4-"1.2.1"}
+Z3_VER=${2:-"4.15.1"}
+CVC4_VER=${3:-"1.8"}
+CVC5_VER=${4:-"1.2.1"}
+
+ARCH="$(uname -m)"
 
 mkdir -p "$SOLVERS_DIR"
 mkdir -p "$TEMP_DIR"
 # cvc5
-wget "https://github.com/cvc5/cvc5/releases/download/cvc5-${CVC5_VER}/cvc5-Linux-static.zip" -O "$TEMP_DIR/cvc5.zip" -q
+wget "https://github.com/cvc5/cvc5/releases/download/cvc5-${CVC5_VER}/cvc5-Linux-${ARCH}-static.zip" -O "$TEMP_DIR/cvc5.zip" -q
 unzip "$TEMP_DIR/cvc5.zip" -d "$TEMP_DIR" 
 CVC5_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -name "*cvc5*")
 mv "$CVC5_DIR/bin/cvc5" "$SOLVERS_DIR/cvc5"
 chmod +x "$SOLVERS_DIR/cvc5"
-rm -rf "$TEMP_DIR"
+# rm -rf "$TEMP_DIR"
 
 # CVC4
 wget "https://cvc4.cs.stanford.edu/downloads/builds/x86_64-linux-opt/cvc4-${CVC4_VER}-x86_64-linux-opt" -O "$SOLVERS_DIR/cvc4" -q
