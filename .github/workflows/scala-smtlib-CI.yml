@@ -10,9 +10,8 @@ jobs:
         java-version: [ 17, 21 ]
     env:
       # define Java options for both official sbt and sbt-extras
-      JAVA_OPTS_TMP_DIR: ./tmp_java
-      JAVA_OPTS: -Xss64M -Xms1024M -Xmx8G -Djava.io.tmpdir=$JAVA_OPTS_TMP_DIR
-      JVM_OPTS:  -Xss64M -Xms1024M -Xmx8G -Djava.io.tmpdir=$JAVA_OPTS_TMP_DIR
+      JAVA_OPTS: -Xss64M -Xms1024M -Xmx8G
+      JVM_OPTS:  -Xss64M -Xms1024M -Xmx8G
       # solver versions to test against
       Z3_VER: 4.15.1
       CVC4_VER: 1.8
@@ -31,8 +30,6 @@ jobs:
       run: |
         ./scripts/install_sbt.sh
         echo "PATH=./sbt/bin/:$PATH" >> "$GITHUB_ENV"
-    - name: Prepare temp folder
-      run: rm -rf $JAVA_OPTS_TMP_DIR && mkdir -p $JAVA_OPTS_TMP_DIR
     - name: Install solvers
       run: ./scripts/install_solvers.sh $GITHUB_WORKSPACE/.local/bin $Z3_VER $CVC4_VER $CVC5_VER
     - name: Add solvers to PATH
