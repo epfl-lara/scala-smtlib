@@ -37,7 +37,7 @@ Z3_URL=$(
   grep "browser_download_url.*${Z3_FILE_PREFIX}" | #| # find url for the correct build
   sed 's/^.*: //;s/^"//;s/"$//' # strip non-url
 )
-wget -c "${Z3_URL}" -O "$TEMP_DIR/z3.zip" 
+wget -c "${Z3_URL}" -O "$TEMP_DIR/z3.zip" -q
 unzip "$TEMP_DIR/z3.zip" -d "$TEMP_DIR" 
 Z3_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -name "*z3*")
 mv "$Z3_DIR/bin/z3" "$SOLVERS_DIR/z3"
