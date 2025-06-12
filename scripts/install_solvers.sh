@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-TEMP_DIR="${pwd}/temp"
+TEMP_DIR="$(pwd)/temp"
 SOLVERS_DIR="$1"
 
 Z3_VER=${2-"4.15.1"}
