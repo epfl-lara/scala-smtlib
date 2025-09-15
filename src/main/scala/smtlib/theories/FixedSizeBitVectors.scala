@@ -48,7 +48,7 @@ object FixedSizeBitVectors {
       case QualifiedIdentifier(
         Identifier(SSymbol(cst), Seq(SNumeral(size))),
         None
-      ) if cst startsWith "bv" =>
+      ) if cst `startsWith` "bv" =>
         Some(BigInt(cst drop 2) -> size)
 
       case _ => None

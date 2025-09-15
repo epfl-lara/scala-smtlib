@@ -18,6 +18,15 @@ class ProcessInterpreterTests extends AnyFunSuite with TestHelpers {
   //TODO: properly get all interpreters
   def interpreters: Seq[Interpreter] = Seq(getZ3Interpreter)
 
+  test("Interpreter can be created with complex executable names") {
+    // sometimes we are given arguments in the executable name itself;
+    // check that these are split and processed correctly
+    val z3Interpreter = new Z3Interpreter("z3 -in", Array("-smt2")) {}
+    z3Interpreter.eval(trees.Commands.SetLogic(trees.Commands.AUFLIA()))
+    z3Interpreter.eval(trees.Commands.CheckSat())
+    z3Interpreter.interrupt()
+  }
+
   test("Interrupt after free does not throw an exception") {
     //TODO: check against all interpreters
     val z3Interpreter = getZ3Interpreter

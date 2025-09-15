@@ -22,7 +22,7 @@ object TermsOps {
     * @return the new sort after applying the mapping
     */
   def postMap(f: (Sort) => Option[Sort])(sort: Sort): Sort = {
-    val rec = postMap(f) _
+    val rec = postMap(f)
     val Sort(id, subSorts) = sort
 
     val recSorts = subSorts.map(rec)
@@ -51,7 +51,7 @@ object TermsOps {
     * @note this operation can diverge if f is not well formed
     */
   def preMap(f: (Sort) => Option[Sort])(sort: Sort): Sort = {
-    val rec = preMap(f) _
+    val rec = preMap(f)
     val newSort = f(sort).getOrElse(sort)
     val Sort(id, subSorts) = newSort
 
@@ -65,14 +65,14 @@ object TermsOps {
 
 
   def postTraversal(f: (Sort) => Unit)(sort: Sort): Unit = {
-    val rec = postTraversal(f) _
+    val rec = postTraversal(f)
     val Sort(_, subSorts) = sort
     subSorts.foreach(rec)
     f(sort)
   }
 
   def preTraversal(f: (Sort) => Unit)(sort: Sort): Unit = {
-    val rec = preTraversal(f) _
+    val rec = preTraversal(f)
     val Sort(_, subSorts) = sort
     f(sort)
     subSorts.foreach(rec)
@@ -80,7 +80,7 @@ object TermsOps {
 
 
   def fold[T](f: (Sort, Seq[T]) => T)(sort: Sort): T = {
-    val rec = fold(f) _
+    val rec = fold(f)
     val Sort(_, ss) = sort
     f(sort, ss.map(rec))
   }

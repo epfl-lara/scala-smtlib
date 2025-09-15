@@ -81,7 +81,7 @@ object Terms {
 
   case class SList(sexprs: List[SExpr]) extends SExpr with AttributeValue
   object SList {
-    def apply(sexprs: SExpr*): SList = SList(List(sexprs:_*))
+    def apply(sexprs: SExpr*): SList = SList(List(sexprs*))
   }
   case class SKeyword(name: String) extends SExpr
   case class SSymbol(name: String) extends SExpr with AttributeValue with Index
