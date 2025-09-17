@@ -6,6 +6,7 @@ SOLVERS_DIR=${1:-"$(pwd)/solvers"}
 Z3_VER=${2:-"4.15.1"}
 CVC4_VER=${3:-"1.8"}
 CVC5_VER=${4:-"1.2.1"}
+BITWUZLA_VER=${5:-"0.8.2"}
 
 ARCH=$(uname -m)
 # short arch name as used by z3 builds
