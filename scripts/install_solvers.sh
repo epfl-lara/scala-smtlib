@@ -46,7 +46,7 @@ rm -rf "$TEMP_DIR"
 
 # Bitwuzla
 mkdir -p "$TEMP_DIR"
-wget -c https://github.com/bitwuzla/bitwuzla/releases/download/${BITWUZLA_VER}/Bitwuzla-Linux-arm64-static.zip -O "$TEMP_DIR/bitwuzla.zip" -q
+wget -c https://github.com/bitwuzla/bitwuzla/releases/download/${BITWUZLA_VER}/Bitwuzla-Linux-x86_64-static.zip -O "$TEMP_DIR/bitwuzla.zip" -q
 unzip "$TEMP_DIR/bitwuzla.zip" -d "$TEMP_DIR" 
 BITWUZLA_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -name "*Bitwuzla*")
 mv "$BITWUZLA_DIR/bin/bitwuzla" "$SOLVERS_DIR/bitwuzla"
