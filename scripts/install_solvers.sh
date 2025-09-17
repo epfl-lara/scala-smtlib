@@ -44,5 +44,13 @@ mv "$Z3_DIR/bin/z3" "$SOLVERS_DIR/z3"
 chmod +x "$SOLVERS_DIR/z3"
 rm -rf "$TEMP_DIR"
 
+# Bitwuzla
+wget -c https://github.com/bitwuzla/bitwuzla/releases/download/${BITWUZLA_VER}/Bitwuzla-Linux-arm64-static.zip -O "$TEMP_DIR/bitwuzla.zip" -q
+unzip "$TEMP_DIR/bitwuzla.zip" -d "$TEMP_DIR" 
+BITWUZLA_DIR=$(find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -name "*bitwuzla*")
+mv "$BITWUZLA_DIR/bin/bitwuzla" "$SOLVERS_DIR/bitwuzla"
+chmod +x "$SOLVERS_DIR/bitwuzla"
+rm -rf "$TEMP_DIR"
+
 echo "************** Solvers Installed **************"
 exit 0
