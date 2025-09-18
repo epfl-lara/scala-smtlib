@@ -17,6 +17,7 @@ jobs:
       CVC4_VER: 1.8
       CVC5_VER: 1.2.1
       BITWUZLA_VER: 0.8.2
+      INSTALL_SOLVERS: 1
     steps:
     - name: Checkout
       uses: actions/checkout@v4
