@@ -43,6 +43,7 @@ trait TestHelpers {
   def getZ3Interpreter: Interpreter = Z3Interpreter.buildDefault
   def getCVC4Interpreter: Interpreter = CVC4Interpreter.buildDefault
   def getCVC5Interpreter: Interpreter = CVC5Interpreter.buildDefault
+  def getBitwuzlaInterpreter: Interpreter = BitwuzlaInterpreter.buildDefault
 
   def isZ3Available: Boolean = try {
     val _: String = "z3 -help".!!
@@ -67,6 +68,13 @@ trait TestHelpers {
     case _: Exception => false
   }
 
+  def isBitwuzlaAvailable: Boolean = try {
+    val _: String = "bitwuzla --version".!!
+    true
+  } catch {
+    case _: Exception => false
+  }
+
   def executeZ3(file: File)(f: (String) => Unit): Unit = {
     Seq("z3", "-smt2", file.getPath) ! ProcessLogger(f, s => ())
   }
@@ -77,6 +85,10 @@ trait TestHelpers {
 
   def executeCVC5(file: File)(f: (String) => Unit): Unit = {
     Seq("cvc5", "--lang", "smt", file.getPath) ! ProcessLogger(f, s => ())
+  }
+
+  def executeBitwuzla(file: File)(f: (String) => Unit): Unit = {
+    Seq("bitwuzla", "-v", "0", "--lang", "--smt2", file.getPath) ! ProcessLogger(f, s => ())
   }
 
 }
