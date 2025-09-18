@@ -5,7 +5,11 @@ import org.scalatest.funsuite.AnyFunSuite
 import smtlib.trees.Commands._
 import smtlib.trees.CommandsResponses._
 import smtlib.trees.Terms._
-
+import smtlib.theories.FloatingPoint.FloatingPointSort
+import smtlib.theories.FixedSizeBitVectors.BitVectorSort
+import smtlib.trees.TreesOps
+import smtlib.trees.Tree
+import smtlib.theories.FixedSizeBitVectors
 
 /** Checks that formula build with theories module are correctly handled by solvers */
 class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
@@ -56,6 +60,50 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
       }
     } else {
       ignore(cvc5Test) {}
+    }
+
+    /**
+      * Is test in the fragment supported by bitwuzla?
+      * 
+      * May not contain ints, reals, arrays, ADTs
+      *
+      */
+    def testIsBitwuzlaCompatible: Boolean =
+      def isCompat(term: Term): Boolean =
+        def violatingTerm(term: Tree, children: Seq[Boolean]): Boolean = {
+          import smtlib.theories.*
+          term match
+            case FixedSizeBitVectors.BitVectorConstant(_, _) => false // internally contains IntNumeral, but in a valid place
+            case Ints.NumeralLit(_) => true
+            case Reals.DecimalLit(_) => true
+            case FixedSizeBitVectors.Int2BV(_, _) => true
+            case FixedSizeBitVectors.BV2Nat(_) => true
+            // this is enough to rule out the current problematic tests, 
+            // but may need refinement
+            case _ => children.contains(true)
+        }
+        !TreesOps.fold(violatingTerm)(term)
+      
+      def compatibleCommand(cmd: Command): Boolean =
+        cmd match
+          case DeclareFun(_, paramSorts, sort) => (sort +: paramSorts).forall {
+              case BitVectorSort(_) => true
+              case FloatingPointSort(_, _) => true
+              case _ => false
+          }
+          case DeclareSort(_, _) => false
+          case DeclareDatatypes(_) => false
+          case Assert(term) => isCompat(term)
+          case _ => true // may need refinement
+      cmds.forall(compatibleCommand) && (isCompat(formula))
+
+    val bitwuzlaTest = prefix + ": with Bitwuzla"
+    if (isBitwuzlaAvailable && testIsBitwuzlaCompatible) {
+      test(bitwuzlaTest) {
+        runAndCheck(getBitwuzlaInterpreter)
+      }
+    } else {
+      ignore(bitwuzlaTest) {}
     }
   }
 
@@ -221,8 +269,8 @@ class TheoriesBuilderTests extends AnyFunSuite with TestHelpers {
     val f18 = Equals(Add(BitVectorConstant(1, 32), BitVectorConstant(2, 32), BitVectorConstant(3, 32), BitVectorConstant(4, 32)), BitVectorConstant(10, 32))
     mkTest(f18, SatStatus, uniqueName())
 
-    val f20 = Equals(Mul(BitVectorConstant(1, 32), BitVectorConstant(2, 32), BitVectorConstant(3, 32), BitVectorConstant(4, 32)), BitVectorConstant(24, 32))
-    mkTest(f20, SatStatus, uniqueName())
+    val f19 = Equals(Mul(BitVectorConstant(1, 32), BitVectorConstant(2, 32), BitVectorConstant(3, 32), BitVectorConstant(4, 32)), BitVectorConstant(24, 32))
+    mkTest(f19, SatStatus, uniqueName())
   }
 
   {
