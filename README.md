@@ -236,7 +236,7 @@ bit slower and are meant to pass on each commit.
 
 In SBT, the command `sbt test` will run the unit test suite, while the command
 `sbt IntegrationTest/test` will run the integration test suite. During
-development, it should be fine to run in `~testQuick` mode.
+development, it should be fine to run in [quick-testing mode](https://www.scala-sbt.org/1.x/docs/Testing.html#testQuick), as `sbt ~testQuick`, running only previously failing tests or those expected to change on file save.
 
 ### Building the Sources
 
@@ -257,7 +257,7 @@ tests (very fast) you can type:
 $ sbt test
 ```
 
-The functional tests are testing end-to-end flows of Scala SMT-LIB. They do take
+The integration tests test end-to-end flows of Scala SMT-LIB. They do take
 a bit more time and require some setup in your environment. In particular, they
 will try to use the SMT solvers `z3`, `cvc4`, `cvc5`, and `bitwuzla` if they are
 available in your PATH (the commands tried are exactly the solver names as
