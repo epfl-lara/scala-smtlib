@@ -15,10 +15,18 @@ IntegrationTest / logBuffered := false
 
 Test / parallelExecution := true
 
+val laraOrganization = "ch.epfl.lara"
+
 lazy val commonSettings = Seq(
   organization := "com.regblanc",
   name := "scala-smtlib",
-  scalaVersion := "3.7.0",
+  scalaVersion := "3.8.3-RC1-bin-20260218-bb6fc60-NIGHTLY",
+  scalaOrganization := laraOrganization,
+  excludeDependencies ++= Seq(
+    ExclusionRule("org.scala-lang", "scala-library"),
+    ExclusionRule("org.scala-lang", "scala3-library_3"),
+    ExclusionRule("org.scala-lang", "scala3-compiler_3"),
+  ),
 )
 
 lazy val root = (project in file(".")).
