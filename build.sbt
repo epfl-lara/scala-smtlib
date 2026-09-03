@@ -20,7 +20,7 @@ val laraOrganization = "ch.epfl.lara"
 lazy val commonSettings = Seq(
   organization := "com.regblanc",
   name := "scala-smtlib",
-  scalaVersion := "3.10.0-RC1-bin-20260608-cf86bba-NIGHTLY",
+  scalaVersion := "3.10.1-RC1-bin-20260903-e1f9361-NIGHTLY",
   scalaOrganization := laraOrganization,
   excludeDependencies ++= Seq(
     ExclusionRule("org.scala-lang", "scala-library"),
