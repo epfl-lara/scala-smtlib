@@ -4,7 +4,26 @@ Changelog
 Unreleased
 ----------
 
-> Nothing yet
+* Add Bitwuzla solver support
+* Fix interpreter handling of complex executable names with arguments
+* Add continuous integration (CI) pipeline
+* Update to Scala 3.7.0
+* Update sbt to 1.11.1
+* Add floating point theory support
+* Support for cvc5 solver
+* Upgrade to Scala 3.3
+* Make some arithmetic operations n-ary
+* Add int2bv and bv2nat operations
+* Read stderr and return error if not empty
+* Cross-compilation for Scala 3.0
+* Add lexing for #unspecified literal (Z3 4.8.10)
+* Remove bintray settings
+* Make model token optional when parsing solver output
+* Fix SimpleTreeTransformer
+* Fix or operation
+* Minor changes and upgrade to Scala 2.13.1
+* Remove hack for CVC4 and add -i flag as default
+* Various CVC4 compatibility fixes
 
 v0.2.4
 ------

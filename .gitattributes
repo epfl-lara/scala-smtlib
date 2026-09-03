@@ -1,1 +1,1 @@
-src/it/resources/regression/* linguist-vendored
+*.smt2 linguist-vendored
