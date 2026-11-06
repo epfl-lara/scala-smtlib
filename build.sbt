@@ -4,14 +4,21 @@ git.useGitDescribe := true
 
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
-IntegrationTest / javaOptions ++= Seq("-Xss128M")
+/** The configuration of the integration tests, in `src/it`. It replaces the one of sbt, which is deprecated
+ *  (sbt recommends a separate subproject instead), with the same name and id, so that `it:test` and
+ *  `IntegrationTest/test` run the tests. It cannot be called `IntegrationTest` itself, as the settings below
+ *  would then refer to it ambiguously.
+ */
+lazy val ItTest = Configuration.of("IntegrationTest", "it").extend(Runtime)
 
-IntegrationTest / fork := true
+ItTest / javaOptions ++= Seq("-Xss128M")
+
+ItTest / fork := true
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.15" % "test;it"
 
 
-IntegrationTest / logBuffered := false
+ItTest / logBuffered := false
 
 Test / parallelExecution := true
 
@@ -30,9 +37,9 @@ lazy val commonSettings = Seq(
 )
 
 lazy val root = (project in file(".")).
-  configs(IntegrationTest).
+  configs(ItTest).
   settings(commonSettings: _*).
-  settings(Defaults.itSettings: _*)
+  settings(inConfig(ItTest)(Defaults.testSettings): _*)
 
 publishMavenStyle := true
 
