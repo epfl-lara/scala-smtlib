@@ -20,11 +20,11 @@ jobs:
       INSTALL_SOLVERS: 1
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v7
       with:
         submodules: recursive
     - name: Setup JDK
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v6
       with:
         distribution: temurin
         java-version: ${{ matrix.java-version }}
@@ -41,6 +41,6 @@ jobs:
     - name: Run Tests
       run: sbt -Dtest-parallelism=10 -batch test
     - name: Run integration tests
-      run: sbt -Dtest-parallelism=10 -batch it:test
+      run: sbt -Dtest-parallelism=10 -batch IntegrationTest/test
     - name: Clean up
       run: rm -rf $JAVA_OPTS_TMP_DIR
