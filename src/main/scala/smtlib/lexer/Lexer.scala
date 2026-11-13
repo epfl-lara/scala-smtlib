@@ -139,14 +139,13 @@ class Lexer(reader: java.io.Reader) {
           NumeralLit(intPart)
         else {
           nextChar
-          var fracPart: Double = 0
-          var base = 10
+          var fracPart: BigInt = 0
+          var scale = 0
           while(peek.toChar.isDigit) {
-            fracPart += nextChar.asDigit
-            fracPart *= 10
-            base *= 10
+            fracPart = fracPart * 10 + nextChar.asDigit
+            scale += 1
           }
-          DecimalLit(intPart.toDouble + fracPart/base)
+          DecimalLit((BigDecimal(intPart) + BigDecimal(fracPart, scale)).toDouble)
         }
       }
       case s if isSymbolChar(s) || s == '|' => { //this case is after digits, since a symbol cannot start with a digit

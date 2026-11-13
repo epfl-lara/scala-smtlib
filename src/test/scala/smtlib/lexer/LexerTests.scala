@@ -105,6 +105,10 @@ class LexerTests extends AnyFunSuite with TimeLimits {
     }
   }
 
+  test("number with many decimals") {
+    assert(lexUniqueToken("2.6645352591003757") === DecimalLit(2.6645352591003757))
+  }
+
   test("decimal can have leading 0 after the decimal point") {
     assert(lexUniqueToken("12.012") === DecimalLit(12.012))
     assert(lexUniqueToken("12.0012") === DecimalLit(12.0012))
