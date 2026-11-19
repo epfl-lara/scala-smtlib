@@ -13,10 +13,10 @@ jobs:
       JAVA_OPTS: -Xss64M -Xms1024M -Xmx8G
       JVM_OPTS:  -Xss64M -Xms1024M -Xmx8G
       # solver versions to test against
-      Z3_VER: 4.15.1
+      Z3_VER: 5.4.1
       CVC4_VER: 1.8
-      CVC5_VER: 1.2.1
-      BITWUZLA_VER: 0.8.2
+      CVC5_VER: 1.4.2
+      BITWUZLA_VER: 0.10.0
       INSTALL_SOLVERS: 1
     steps:
     - name: Checkout
@@ -39,8 +39,8 @@ jobs:
     - name: Test solvers availability
       run: cvc5 --version && z3 --version && cvc4 --version && bitwuzla --version
     - name: Run Tests
-      run: sbt -Dtest-parallelism=10 -batch test
+      run: sbt --server -Dtest-parallelism=10 -batch test
     - name: Run integration tests
-      run: sbt -Dtest-parallelism=10 -batch IntegrationTest/test
+      run: sbt --server -Dtest-parallelism=10 -batch IntegrationTest/test
     - name: Clean up
       run: rm -rf $JAVA_OPTS_TMP_DIR

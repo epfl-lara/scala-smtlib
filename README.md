@@ -47,7 +47,24 @@ You may want to use Scala SMT-LIB if:
 Setup
 -----
 
-To include Scala SMT-LIB in your project, you can add it as a dependency
+The preferred way to use Scala SMT-LIB is to add it as a dependency in your project from Maven Central.
+
+Releases for Scala 3 are published on Maven Central, under `ch.epfl.lara`. They are compiled
+with Scala 3.9, and work with Scala 3.9 and later. Add the following to your project settings in
+`build.sbt`, with the latest version:
+
+```scala
+libraryDependencies += "ch.epfl.lara" %% "scala-smtlib" % "<version>"
+```
+
+The last stable release for Scala 2.11 is available on Sonatype, add the
+following to your project settings in `build.sbt`:
+
+```scala
+libraryDependencies += "com.regblanc" %% "scala-smtlib" % "0.2.2"
+```
+
+If a Maven dependency does not fit your needs, you can also add it as a dependency
 referring to a commit hash. You can add the following to your `build.sbt`:
 
 ```scala
@@ -65,13 +82,6 @@ lazy val yourProject = (project in file("."))
     // ...
   )
   .dependsOn(scalaSmtlib) // <<<
-```
-
-The last stable release for Scala 2.11 is available on Sonatype, add the
-following to your project settings in `build.sbt`:
-
-```scala
-libraryDependencies += "com.regblanc" %% "scala-smtlib" % "0.2.2"
 ```
 
 Getting Started with Examples
@@ -280,6 +290,22 @@ You can run those tests with:
 ```console
 $ sbt IntegrationTest/test
 ```
+
+Releasing
+---------
+
+Releases are published to Maven Central by the
+[Release workflow](.github/workflows/release.yml). Run it from the Actions tab ("Run workflow" on
+`master`), or with `gh workflow run release.yml -f version=v0.3.0`, giving the version with a
+leading `v`. It tags the current commit (the build takes its version from the tag, through
+`git describe`), tests, signs and publishes that version, then pushes the tag and creates the
+GitHub release, with generated notes and the JAR attached. A version can't be published twice.
+
+To check a release before it goes out, choose the mode `upload`: it only uploads the artifacts to
+the [Central Portal](https://central.sonatype.com/publishing/deployments), to publish or drop
+them there, and pushes no tag.
+
+Locally, `sbt publishSigned` signs the artifacts and stages them in `target/sona-staging`.
 
 Changelog
 ---------
