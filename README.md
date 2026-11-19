@@ -47,7 +47,24 @@ You may want to use Scala SMT-LIB if:
 Setup
 -----
 
-To include Scala SMT-LIB in your project, you can add it as a dependency
+The preferred way to use Scala SMT-LIB is to add it as a dependency in your project from Maven Central.
+
+Releases for Scala 3 are published on Maven Central, under `ch.epfl.lara`. They are compiled
+with Scala 3.9, and work with Scala 3.9 and later. Add the following to your project settings in
+`build.sbt`, with the latest version:
+
+```scala
+libraryDependencies += "ch.epfl.lara" %% "scala-smtlib" % "<version>"
+```
+
+The last stable release for Scala 2.11 is available on Sonatype, add the
+following to your project settings in `build.sbt`:
+
+```scala
+libraryDependencies += "com.regblanc" %% "scala-smtlib" % "0.2.2"
+```
+
+If a Maven dependency does not fit your needs, you can also add it as a dependency
 referring to a commit hash. You can add the following to your `build.sbt`:
 
 ```scala
@@ -65,21 +82,6 @@ lazy val yourProject = (project in file("."))
     // ...
   )
   .dependsOn(scalaSmtlib) // <<<
-```
-
-Releases for Scala 3 are published on Maven Central, under `ch.epfl.lara`. They are compiled
-with Scala 3.9, and work with Scala 3.9 and later. Add the following to your project settings in
-`build.sbt`, with the latest version:
-
-```scala
-libraryDependencies += "ch.epfl.lara" %% "scala-smtlib" % "<version>"
-```
-
-The last stable release for Scala 2.11 is available on Sonatype, add the
-following to your project settings in `build.sbt`:
-
-```scala
-libraryDependencies += "com.regblanc" %% "scala-smtlib" % "0.2.2"
 ```
 
 Getting Started with Examples
