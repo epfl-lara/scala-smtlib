@@ -39,8 +39,8 @@ jobs:
     - name: Test solvers availability
       run: cvc5 --version && z3 --version && cvc4 --version && bitwuzla --version
     - name: Run Tests
-      run: sbt -Dtest-parallelism=10 -batch test
+      run: sbt --server -Dtest-parallelism=10 -batch test
     - name: Run integration tests
-      run: sbt -Dtest-parallelism=10 -batch IntegrationTest/test
+      run: sbt --server -Dtest-parallelism=10 -batch IntegrationTest/test
     - name: Clean up
       run: rm -rf $JAVA_OPTS_TMP_DIR

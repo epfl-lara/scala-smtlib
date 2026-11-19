@@ -101,14 +101,14 @@ jobs:
     - name: Fetch sbt
       run: |
         for attempt in 1 2 3; do
-          sbt -batch sbtVersion && exit 0
+          sbt --server -batch sbtVersion && exit 0
           echo "::warning::Fetching sbt failed (attempt $attempt), retrying in 30s"
           sleep 30
         done
         exit 1
     - name: Check the version of the build
       run: |
-        version=$(sbt -batch -no-colors "print version" | tail -n 1 | tr -d '[:space:]')
+        version=$(sbt --server -batch -no-colors "print version" | tail -n 1 | tr -d '[:space:]')
         if [ "$version" != "$VERSION" ]; then
           echo "::error::The build's version is $version instead of $VERSION (e.g. -SNAPSHOT when the working tree has changes)"
           exit 1
@@ -126,7 +126,7 @@ jobs:
     # The unit tests: the integration tests need SMT solvers, and run in the CI workflow
     - name: Test
       if: steps.published.outputs.already == 'false'
-      run: sbt -batch test
+      run: sbt --server -batch test
     - name: Import the signing key
       if: steps.published.outputs.already == 'false'
       id: gpg
@@ -138,10 +138,10 @@ jobs:
       if: steps.published.outputs.already == 'false'
       run: |
         if [ "$MODE" = "upload" ]; then
-          sbt -batch publishSigned sonaUpload
+          sbt --server -batch publishSigned sonaUpload
           echo "::notice::Scala-SMTLIB $VERSION uploaded: publish or drop it in the Central Portal. No tag was pushed and no release created."
         else
-          sbt -batch publishSigned sonaRelease
+          sbt --server -batch publishSigned sonaRelease
           echo "::notice::Scala-SMTLIB $VERSION released; it shows up on Maven Central within about 30 minutes"
         fi
       env:
@@ -164,8 +164,8 @@ jobs:
           echo "Release $TAG already exists"
           exit 0
         fi
-        sbt -batch package
-        cp target/scala-*/scala-smtlib_3-"$VERSION".jar .
+        sbt --server -batch package
+        cp -L target/out/jvm/scala-*/scala-smtlib/scala-smtlib_3-"$VERSION".jar .
         # Notes generated from the pull requests merged since the previous release
         gh release create "$TAG" \
           --title "Scala-SMTLIB $VERSION" \

@@ -35,8 +35,8 @@ lazy val commonSettings = Seq(
 
 lazy val root = (project in file(".")).
   configs(ItTest).
-  settings(commonSettings: _*).
-  settings(inConfig(ItTest)(Defaults.testSettings): _*)
+  settings(commonSettings*).
+  settings(inConfig(ItTest)(Defaults.testSettings)*)
 
 // Publishing to Maven Central (see .github/workflows/release.yml). The version comes from the
 // latest tag, through `git describe` (sbt-git): v0.3.0 gives 0.3.0, and -SNAPSHOT is appended when
@@ -46,18 +46,18 @@ lazy val root = (project in file(".")).
 // from SONATYPE_USERNAME and SONATYPE_PASSWORD.
 description := "A Scala library to interact with SMT solvers through the SMT-LIB standard"
 
-homepage := Some(url("https://github.com/epfl-lara/scala-smtlib"))
+homepage := Some(uri("https://github.com/epfl-lara/scala-smtlib"))
 
-licenses := Seq("MIT" -> url("https://opensource.org/licenses/MIT"))
+licenses := Seq("MIT" -> uri("https://opensource.org/licenses/MIT"))
 
 scmInfo := Some(ScmInfo(
-  url("https://github.com/epfl-lara/scala-smtlib"),
+  uri("https://github.com/epfl-lara/scala-smtlib"),
   "scm:git:git@github.com:epfl-lara/scala-smtlib.git",
 ))
 
 developers := List(
-  Developer("reg", "Regis Blanc", "", url("http://regblanc.com")),
-  Developer("epfl-lara", "EPFL Lab for Automated Reasoning and Analysis", "lara.maven@epfl.ch", url("https://lara.epfl.ch")),
+  Developer("reg", "Regis Blanc", "", uri("http://regblanc.com")),
+  Developer("epfl-lara", "EPFL Lab for Automated Reasoning and Analysis", "lara.maven@epfl.ch", uri("https://lara.epfl.ch")),
 )
 
 publishMavenStyle := true
@@ -68,5 +68,6 @@ pomIncludeRepository := { _ => false }
 
 publishTo := localStaging.value
 
-// The key that signs the artifacts, when the keyring holds several
-pgpSigningKey := sys.env.get("PGP_FINGERPRINT")
+// The key that signs the artifacts, when the keyring holds several. Not cached: sbt would
+// otherwise keep the value of a previous run, since it can't see the environment variable.
+pgpSigningKey := Def.uncached(sys.env.get("PGP_FINGERPRINT"))
